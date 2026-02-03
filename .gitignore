@@ -1,0 +1,8 @@
+.DS_Store
+*.swp
+*.swo
+*~
+debug/
+video/
+*.mp4
+*.mov

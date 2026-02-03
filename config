@@ -1,0 +1,228 @@
+# GHOSTTY - Claude Code Orchestrator Config
+# Optimized for multi-agent workflows with parallel sub-agents
+# "I know kung fu." - Neo, 1999
+
+# ============================================
+# THE MATRIX THEME (1999) - High Fidelity
+# "Welcome to the Real World"
+# ============================================
+
+# Phosphor-accurate colors (not pure black - slight purple/green tint)
+background = #0d0208
+foreground = #00FF41
+
+# Cursor - the blinking truth
+cursor-color = #00FF41
+cursor-text = #000000
+cursor-style = block
+cursor-style-blink = true
+
+# Selection - seeing through the code
+selection-background = #003B00
+selection-foreground = #00FF41
+
+# Split divider - the boundaries of reality
+split-divider-color = #00FF41
+
+# Palette - shades of the Matrix
+# Black (phosphor dark)
+palette = 0=#0d0208
+palette = 8=#003B00
+
+# Red (the pill)
+palette = 1=#00FF41
+palette = 9=#00FF41
+
+# Green (the code)
+palette = 2=#00FF41
+palette = 10=#39FF14
+
+# Yellow (system alerts)
+palette = 3=#008F11
+palette = 11=#00FF41
+
+# Blue (mapped to green - there is no blue pill here)
+palette = 4=#008F11
+palette = 12=#00FF41
+
+# Magenta (agents)
+palette = 5=#00FF41
+palette = 13=#39FF14
+
+# Cyan (data streams)
+palette = 6=#005F00
+palette = 14=#00FF41
+
+# White (bright green)
+palette = 7=#00FF41
+palette = 15=#FFFFFF
+
+# Bold is brighter green
+bold-is-bright = true
+
+# ============================================
+# PERFORMANCE (for heavy parallel agent output)
+# ============================================
+macos-non-native-fullscreen = true
+window-vsync = true
+
+# Massive scrollback for long agent sessions (100MB)
+scrollback-limit = 100000000
+
+# Large image storage for visual outputs
+image-storage-limit = 500000000
+
+# ============================================
+# TYPOGRAPHY
+# ============================================
+font-family = "JetBrainsMono Nerd Font"
+font-size = 14
+font-feature = liga
+font-feature = calt
+
+# Phosphor glow effect - thickens font strokes (macOS only)
+font-thicken = true
+
+# ============================================
+# WINDOW - Persistent workspace
+# ============================================
+window-padding-x = 4
+window-padding-y = 4
+background-opacity = 0.92
+
+# Save/restore your orchestrator layout between sessions
+window-save-state = always
+window-inherit-working-directory = true
+window-inherit-font-size = true
+
+# Keep Ghostty running for quick re-access
+quit-after-last-window-closed = false
+
+# ============================================
+# SHELL INTEGRATION (better prompt detection)
+# ============================================
+shell-integration = detect
+shell-integration-features = cursor,sudo,title
+
+# ============================================
+# SPLITS - Multi-agent monitoring
+# ============================================
+# Strong visual distinction for active vs background agents
+unfocused-split-opacity = 0.6
+unfocused-split-fill = #001100
+
+# Navigate splits (watching multiple agents)
+keybind = super+d=new_split:right
+keybind = super+shift+d=new_split:down
+keybind = super+alt+left=goto_split:left
+keybind = super+alt+right=goto_split:right
+keybind = super+alt+up=goto_split:top
+keybind = super+alt+down=goto_split:bottom
+
+# Quick split resize for focusing on active agent
+keybind = super+alt+equal=resize_split:up,10
+keybind = super+alt+minus=resize_split:down,10
+keybind = super+alt+shift+equal=resize_split:right,10
+keybind = super+alt+shift+minus=resize_split:left,10
+
+# Equalize splits after spawning agents
+keybind = super+alt+0=equalize_splits
+
+# Zoom into single agent output, toggle back
+keybind = super+shift+z=toggle_split_zoom
+
+# ============================================
+# TABS - Multiple orchestrator sessions
+# ============================================
+keybind = super+t=new_tab
+keybind = super+w=close_surface
+keybind = super+shift+enter=toggle_fullscreen
+
+# Quick tab switching (1-9)
+keybind = super+1=goto_tab:1
+keybind = super+2=goto_tab:2
+keybind = super+3=goto_tab:3
+keybind = super+4=goto_tab:4
+keybind = super+5=goto_tab:5
+keybind = super+6=goto_tab:6
+
+# Tab navigation
+keybind = super+shift+left=previous_tab
+keybind = super+shift+right=next_tab
+
+# ============================================
+# CLIPBOARD - Fast copy/paste for code
+# ============================================
+copy-on-select = clipboard
+clipboard-read = allow
+clipboard-write = allow
+clipboard-trim-trailing-spaces = true
+clipboard-paste-protection = false
+
+# ============================================
+# MOUSE - Easy selection, copy, paste
+# ============================================
+mouse-hide-while-typing = false
+focus-follows-mouse = true
+mouse-scroll-multiplier = 5
+
+# Right-click: copy if text selected, paste otherwise
+right-click-action = copy-or-paste
+
+# Double-click selects word, triple-click selects line (default behavior)
+# Selection stays visible until you click elsewhere
+selection-clear-on-typing = false
+
+# ============================================
+# SCROLLING - Navigate agent output fast
+# ============================================
+keybind = super+up=scroll_page_up
+keybind = super+down=scroll_page_down
+keybind = super+home=scroll_to_top
+keybind = super+end=scroll_to_bottom
+
+# Jump half page (for scanning agent logs)
+keybind = ctrl+u=scroll_page_fractional:-0.5
+keybind = ctrl+d=scroll_page_fractional:0.5
+
+# ============================================
+# SEARCH - Find in agent output
+# ============================================
+# Note: Ghostty doesn't have a text search keybind action
+# Use Cmd+Shift+J to write screen to file, then search externally
+keybind = super+f=write_screen_file:open
+
+# ============================================
+# QUICK ACTIONS
+# ============================================
+keybind = super+k=clear_screen
+keybind = super+shift+c=copy_to_clipboard
+keybind = super+shift+v=paste_from_clipboard
+
+# Open config for quick tweaks
+keybind = super+comma=open_config
+
+# ============================================
+# QUICK TERMINAL (Global dropdown)
+# ============================================
+quick-terminal-position = top
+quick-terminal-size = 60%
+quick-terminal-animation-duration = 0.08
+quick-terminal-autohide = false
+
+# ============================================
+# LINKS & URLs
+# ============================================
+link-url = true
+
+# ============================================
+# NOTIFICATIONS (when long tasks complete)
+# ============================================
+desktop-notifications = true
+
+# ============================================
+# MATRIX SHADER - Phosphor bloom (recommended)
+# "The Matrix is everywhere. It is all around us."
+# ============================================
+custom-shader = ~/.config/ghostty/shaders/bloom.glsl
+custom-shader-animation = true
