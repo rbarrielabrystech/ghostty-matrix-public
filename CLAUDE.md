@@ -9,7 +9,8 @@ A Matrix-inspired terminal theme for Ghostty with authentic 1999 aesthetics.
 ### Shaders
 - **bloom.glsl** - Phosphor glow effect (recommended, readable)
 - **matrix-glow.glsl** - Subtle green glow variant
-- **crt.glsl** - Full CRT with scanlines (heavy, less readable)
+- **crt.glsl** - CRT scanlines only (no curvature)
+- **crt-full.glsl** - Full 1999 CRT (curvature + scanlines + shadow mask + vignette)
 
 ### cxxmatrix
 High-fidelity Matrix rain animation from https://github.com/akinomyoga/cxxmatrix
@@ -29,16 +30,24 @@ matrix-conway     # Conway's Game of Life
 matrix-mandelbrot # Mandelbrot fractal
 matrix-full       # Complete show (all modes)
 matrix-demo       # Reset lock and re-trigger
-matrix-config     # Edit configuration
+matrix-config     # Interactive configuration menu
 ```
 
 ## Config Locations
 - Ghostty config: `~/.config/ghostty/config`
 - Matrix settings: `~/.config/ghostty/matrix.conf`
 - Shaders: `~/.config/ghostty/shaders/`
+- Interactive config: `~/.config/ghostty/matrix-config.sh`
 - Startup script: `~/.config/ghostty/matrix-startup.sh` (animation)
 - Header script: `~/.config/ghostty/matrix-header.sh` (quote/status)
 - Shell integration: `~/.zshrc` or `~/.bashrc`
+
+## Presets (via matrix-config)
+- **Full 1999 CRT** - crt-full.glsl, curvature, scanlines, shadow mask, solid BG, thick font
+- **CRT Lite** - crt.glsl, scanlines only, no curvature
+- **Phosphor Bloom** - bloom.glsl, soft glow (recommended default)
+- **Subtle Glow** - matrix-glow.glsl, minimal effect
+- **Clean Terminal** - no shader, just Matrix colors
 
 ## Key Settings (matrix.conf)
 - `MATRIX_ANIMATION_FREQUENCY` - daily, weekly, always, never

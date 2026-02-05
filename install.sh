@@ -43,8 +43,11 @@ mkdir -p ~/.local/bin
 cp config ~/.config/ghostty/config
 cp matrix-startup.sh ~/.config/ghostty/matrix-startup.sh
 cp matrix-header.sh ~/.config/ghostty/matrix-header.sh
+cp matrix-config.sh ~/.config/ghostty/matrix-config.sh
 chmod +x ~/.config/ghostty/matrix-startup.sh
 chmod +x ~/.config/ghostty/matrix-header.sh
+chmod +x ~/.config/ghostty/matrix-config.sh
+ln -sf ~/.config/ghostty/matrix-config.sh ~/.local/bin/matrix-config
 
 # Copy user configuration (don't overwrite if exists)
 if [ ! -f ~/.config/ghostty/matrix.conf ]; then
@@ -222,7 +225,7 @@ alias matrix-conway='~/.local/bin/cxxmatrix -s conway 2>/dev/null || cxxmatrix -
 alias matrix-mandelbrot='~/.local/bin/cxxmatrix -s mandelbrot 2>/dev/null || cxxmatrix -s mandelbrot'
 alias matrix-full='~/.local/bin/cxxmatrix -s number,banner,rain,conway,mandelbrot,loop 2>/dev/null || cxxmatrix -s number,banner,rain,conway,mandelbrot,loop'
 alias matrix-custom='~/.local/bin/cxxmatrix -m 2>/dev/null || cxxmatrix -m'
-alias matrix-config='${EDITOR:-nano} ~/.config/ghostty/matrix.conf'
+alias matrix-config='~/.config/ghostty/matrix-config.sh'
 EOF
 fi
 
@@ -232,14 +235,14 @@ echo ""
 echo "Platform: $OS_TYPE"
 echo ""
 echo "Configuration:"
-echo "  Edit settings: matrix-config (or edit ~/.config/ghostty/matrix.conf)"
-echo "  Animation frequency: daily, weekly, always, never"
+echo "  matrix-config - Interactive configuration menu"
+echo "  Presets: Full 1999 CRT, CRT Lite, Phosphor Bloom, Subtle, Clean"
 echo ""
 echo "Commands:"
 echo "  matrix        - Run the full startup sequence"
 echo "  matrix-demo   - Reset lock and re-trigger animation"
 echo "  matrix-rain   - Endless falling code"
-echo "  matrix-config - Edit configuration"
+echo "  matrix-config - Interactive configuration (shader, animation, more)"
 echo ""
 echo "Next steps:"
 echo "  1. Restart Ghostty (close all windows, then reopen)"
