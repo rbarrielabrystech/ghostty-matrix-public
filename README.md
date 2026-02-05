@@ -12,9 +12,12 @@ High-fidelity Matrix (1999) terminal setup for [Ghostty](https://ghostty.org/).
 
 - **Authentic Matrix rain** using [cxxmatrix](https://github.com/akinomyoga/cxxmatrix) with half-width katakana
 - **Movie-accurate startup sequence**: number fall → rain → "WAKE UP NEO" banner → "Follow the white rabbit."
-- **CRT shader effects**: scanlines + phosphor bloom
+- **Full 1999 CRT mode**: barrel distortion, scanlines, shadow mask, vignette — like sitting in front of a CRT monitor in 1999
+- **4 shader effects**: CRT Full, CRT Scanlines, Phosphor Bloom, Matrix Glow
+- **Interactive configuration TUI** (`matrix-config`): presets, shader picker, 18+ settings
+- **5 one-click presets**: Full 1999 CRT, CRT Lite, Phosphor Bloom, Subtle Glow, Clean Terminal
 - **Phosphor-green color scheme** with accurate `#0d0208` background
-- **Fully configurable**: animation frequency, colors, quotes, and more
+- **Fully configurable**: animation frequency, duration, sequences, colors, quotes, and more
 - **Skip animation** with any keypress
 - **Cross-platform**: Works on Linux, macOS, and Windows (WSL/Git Bash)
 
@@ -44,17 +47,48 @@ The installer will:
 
 ## Configuration
 
-All settings are configurable via `~/.config/ghostty/matrix.conf`:
+Run the interactive configuration menu:
 
 ```bash
-# Edit configuration
 matrix-config
-
-# Or manually
-nano ~/.config/ghostty/matrix.conf
 ```
 
-### Key Settings
+This opens a full TUI with two screens:
+
+### Presets (one-click setup)
+
+| Preset | Shader | Description |
+|--------|--------|-------------|
+| **Full 1999 CRT** | `crt-full.glsl` | Curvature + scanlines + shadow mask + vignette, solid BG, thick font |
+| **CRT Lite** | `crt.glsl` | Scanlines without curvature, slightly transparent |
+| **Phosphor Bloom** | `bloom.glsl` | Soft glow around text, very readable (recommended) |
+| **Subtle Glow** | `matrix-glow.glsl` | Minimal green glow, for daily driving |
+| **Clean Terminal** | none | Matrix colors only, no shader effects |
+
+### Custom Settings
+
+Press `c` from the presets screen to access individual controls:
+
+| Category | Settings |
+|----------|----------|
+| **Shader** | Shader picker with descriptions for all 5 options |
+| **Animation** | Frequency, duration, sequence, text sequence, typing speed, skip, diffuse, twinkle |
+| **Terminal** | Font thicken (phosphor), font size, background opacity, cursor style/blink, window padding |
+| **Header** | Show/hide header, quote, system info |
+
+### Manual Configuration
+
+You can also edit the config files directly:
+
+```bash
+# Matrix animation/behavior settings
+nano ~/.config/ghostty/matrix.conf
+
+# Ghostty terminal settings (shader, font, colors)
+nano ~/.config/ghostty/config
+```
+
+### Key Settings (matrix.conf)
 
 | Setting | Options | Default | Description |
 |---------|---------|---------|-------------|
@@ -64,6 +98,9 @@ nano ~/.config/ghostty/matrix.conf
 | `MATRIX_SHOW_QUOTE` | true, false | true | Show random Matrix quote |
 | `MATRIX_ALLOW_SKIP` | true, false | true | Allow skipping with keypress |
 | `MATRIX_CUSTOM_QUOTES` | pipe-separated | "" | Add your own quotes |
+| `MATRIX_SEQUENCE` | see below | number,rain,banner | cxxmatrix animation sequence |
+| `MATRIX_DIFFUSE` | true, false | true | Background glow in animation |
+| `MATRIX_TWINKLE` | true, false | true | Brightness fluctuations |
 
 See `matrix.conf` for all available options.
 
@@ -83,32 +120,35 @@ Press any key to skip at any point.
 ## Commands
 
 ```bash
+matrix-config       # Interactive configuration TUI
 matrix              # Run full startup sequence
 matrix-demo         # Reset lock and re-trigger animation
 matrix-rain         # Endless katakana rain
 matrix-conway       # Conway's Game of Life
 matrix-mandelbrot   # Mandelbrot fractal zoom
 matrix-full         # All scenes in a loop
-matrix-config       # Edit configuration
 ```
 
 ## Shaders
 
-Located in `shaders/`:
+Located in `shaders/`. Switch between them via `matrix-config` or edit `~/.config/ghostty/config` directly.
 
-| Shader | Description | CPU Usage |
-|--------|-------------|-----------|
-| `bloom.glsl` | Phosphor glow effect (recommended) | Low |
-| `matrix-glow.glsl` | Subtle green glow | Low |
-| `crt.glsl` | Full CRT with scanlines | Medium |
+| Shader | Description | Effect | CPU Usage |
+|--------|-------------|--------|-----------|
+| `crt-full.glsl` | Full 1999 CRT | Barrel distortion, scanlines, shadow mask, vignette | Medium |
+| `crt.glsl` | CRT Scanlines | Scanlines only, no curvature | Medium |
+| `bloom.glsl` | Phosphor Bloom (recommended) | Soft glow around bright text | Low |
+| `matrix-glow.glsl` | Matrix Glow | Subtle green glow, minimal | Low |
 
-To change shader, edit `~/.config/ghostty/config`:
+To change shader manually:
 ```bash
-custom-shader = ~/.config/ghostty/shaders/bloom.glsl
+# In ~/.config/ghostty/config
+custom-shader = ~/.config/ghostty/shaders/crt-full.glsl
 ```
 
-To disable shaders, comment out the line:
+To disable shaders:
 ```bash
+# Comment out or remove the line
 # custom-shader = ...
 ```
 
@@ -118,15 +158,18 @@ To disable shaders, comment out the line:
 ~/.config/ghostty/
 ├── config                # Ghostty terminal config
 ├── matrix.conf           # Matrix theme settings
+├── matrix-config.sh      # Interactive configuration TUI
 ├── matrix-startup.sh     # Full animation script
 ├── matrix-header.sh      # Header-only script
 └── shaders/
-    ├── bloom.glsl        # Phosphor bloom
-    ├── crt.glsl          # CRT scanlines
-    └── matrix-glow.glsl  # Green glow
+    ├── crt-full.glsl     # Full 1999 CRT (curvature + mask)
+    ├── crt.glsl          # CRT scanlines only
+    ├── bloom.glsl        # Phosphor bloom (default)
+    └── matrix-glow.glsl  # Subtle green glow
 
 ~/.local/bin/
-└── cxxmatrix             # Matrix rain binary
+├── cxxmatrix             # Matrix rain binary
+└── matrix-config         # Symlink to config TUI
 ```
 
 ## Manual Installation
