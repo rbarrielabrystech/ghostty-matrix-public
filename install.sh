@@ -226,7 +226,147 @@ alias matrix-mandelbrot='~/.local/bin/cxxmatrix -s mandelbrot 2>/dev/null || cxx
 alias matrix-full='~/.local/bin/cxxmatrix -s number,banner,rain,conway,mandelbrot,loop 2>/dev/null || cxxmatrix -s number,banner,rain,conway,mandelbrot,loop'
 alias matrix-custom='~/.local/bin/cxxmatrix -m 2>/dev/null || cxxmatrix -m'
 alias matrix-config='~/.config/ghostty/matrix-config.sh'
+
+# CRT shutdown animation (swap shader, animate, restore, exit)
+matrix-shutdown() {
+    # Only works in interactive Ghostty terminals
+    if [[ "$TERM_PROGRAM" != "ghostty" ]] || [[ $- != *i* ]]; then
+        builtin exit "$@"
+        return
+    fi
+
+    # Check if shutdown animation is enabled
+    local _conf="$HOME/.config/ghostty/matrix.conf"
+    local _enabled="true"
+    if [ -f "$_conf" ]; then
+        _enabled=$(grep -E "^MATRIX_SHUTDOWN_ANIMATION=" "$_conf" 2>/dev/null | tail -1 | cut -d'=' -f2- | tr -d '"' | tr -d "'")
+        [ -z "$_enabled" ] && _enabled="true"
+    fi
+
+    if [ "$_enabled" != "true" ]; then
+        builtin exit "$@"
+        return
+    fi
+
+    local _ghostty_conf="$HOME/.config/ghostty/config"
+    local _shutdown_shader="$HOME/.config/ghostty/shaders/crt-shutdown.glsl"
+
+    # Shader file must exist
+    if [ ! -f "$_shutdown_shader" ] || [ ! -f "$_ghostty_conf" ]; then
+        builtin exit "$@"
+        return
+    fi
+
+    # Record current shader
+    local _original_shader
+    _original_shader=$(grep -E "^custom-shader\s*=" "$_ghostty_conf" 2>/dev/null | tail -1 | sed 's/^[^=]*=\s*//')
+
+    # BSD/GNU sed detection
+    local _sed_i
+    if sed --version 2>/dev/null | grep -q GNU; then
+        _sed_i="sed -i"
+    else
+        _sed_i="sed -i ''"
+    fi
+
+    # Swap to shutdown shader (triggers hot-reload)
+    if grep -qE "^custom-shader\s*=" "$_ghostty_conf" 2>/dev/null; then
+        eval "$_sed_i" "'s|^custom-shader *=.*|custom-shader = $_shutdown_shader|'" "$_ghostty_conf"
+    else
+        echo "custom-shader = $_shutdown_shader" >> "$_ghostty_conf"
+    fi
+
+    # Wait for animation (1.6s + buffer)
+    sleep 2
+
+    # Restore original shader
+    if [ -n "$_original_shader" ]; then
+        eval "$_sed_i" "'s|^custom-shader *=.*|custom-shader = $_original_shader|'" "$_ghostty_conf"
+    else
+        eval "$_sed_i" "'/^custom-shader *=/d'" "$_ghostty_conf"
+    fi
+
+    builtin exit "$@"
+}
+
+alias matrix-off='matrix-shutdown'
+
+# Opt-in: wrap 'exit' to trigger shutdown animation
+if [[ "$TERM_PROGRAM" == "ghostty" ]] && [[ $- == *i* ]]; then
+    _matrix_conf="$HOME/.config/ghostty/matrix.conf"
+    _matrix_exit_enabled="false"
+    if [ -f "$_matrix_conf" ]; then
+        _matrix_exit_enabled=$(grep -E "^MATRIX_SHUTDOWN_ON_EXIT=" "$_matrix_conf" 2>/dev/null | tail -1 | cut -d'=' -f2- | tr -d '"' | tr -d "'")
+    fi
+    if [ "$_matrix_exit_enabled" = "true" ]; then
+        exit() { matrix-shutdown "$@"; }
+    fi
+    unset _matrix_conf _matrix_exit_enabled
+fi
 EOF
+fi
+
+# Upgrade: add matrix-shutdown if shell integration exists but function is missing
+if grep -q "matrix-startup.sh" "$SHELL_RC" 2>/dev/null && ! grep -q "matrix-shutdown" "$SHELL_RC" 2>/dev/null; then
+    echo -e "${GREEN}Upgrading shell integration with shutdown function...${NC}"
+    cat >> "$SHELL_RC" << 'SHUTDOWN_EOF'
+
+# CRT shutdown animation (swap shader, animate, restore, exit)
+matrix-shutdown() {
+    if [[ "$TERM_PROGRAM" != "ghostty" ]] || [[ $- != *i* ]]; then
+        builtin exit "$@"
+        return
+    fi
+    local _conf="$HOME/.config/ghostty/matrix.conf"
+    local _enabled="true"
+    if [ -f "$_conf" ]; then
+        _enabled=$(grep -E "^MATRIX_SHUTDOWN_ANIMATION=" "$_conf" 2>/dev/null | tail -1 | cut -d'=' -f2- | tr -d '"' | tr -d "'")
+        [ -z "$_enabled" ] && _enabled="true"
+    fi
+    if [ "$_enabled" != "true" ]; then
+        builtin exit "$@"
+        return
+    fi
+    local _ghostty_conf="$HOME/.config/ghostty/config"
+    local _shutdown_shader="$HOME/.config/ghostty/shaders/crt-shutdown.glsl"
+    if [ ! -f "$_shutdown_shader" ] || [ ! -f "$_ghostty_conf" ]; then
+        builtin exit "$@"
+        return
+    fi
+    local _original_shader
+    _original_shader=$(grep -E "^custom-shader\s*=" "$_ghostty_conf" 2>/dev/null | tail -1 | sed 's/^[^=]*=\s*//')
+    local _sed_i
+    if sed --version 2>/dev/null | grep -q GNU; then
+        _sed_i="sed -i"
+    else
+        _sed_i="sed -i ''"
+    fi
+    if grep -qE "^custom-shader\s*=" "$_ghostty_conf" 2>/dev/null; then
+        eval "$_sed_i" "'s|^custom-shader *=.*|custom-shader = $_shutdown_shader|'" "$_ghostty_conf"
+    else
+        echo "custom-shader = $_shutdown_shader" >> "$_ghostty_conf"
+    fi
+    sleep 2
+    if [ -n "$_original_shader" ]; then
+        eval "$_sed_i" "'s|^custom-shader *=.*|custom-shader = $_original_shader|'" "$_ghostty_conf"
+    else
+        eval "$_sed_i" "'/^custom-shader *=/d'" "$_ghostty_conf"
+    fi
+    builtin exit "$@"
+}
+alias matrix-off='matrix-shutdown'
+if [[ "$TERM_PROGRAM" == "ghostty" ]] && [[ $- == *i* ]]; then
+    _matrix_conf="$HOME/.config/ghostty/matrix.conf"
+    _matrix_exit_enabled="false"
+    if [ -f "$_matrix_conf" ]; then
+        _matrix_exit_enabled=$(grep -E "^MATRIX_SHUTDOWN_ON_EXIT=" "$_matrix_conf" 2>/dev/null | tail -1 | cut -d'=' -f2- | tr -d '"' | tr -d "'")
+    fi
+    if [ "$_matrix_exit_enabled" = "true" ]; then
+        exit() { matrix-shutdown "$@"; }
+    fi
+    unset _matrix_conf _matrix_exit_enabled
+fi
+SHUTDOWN_EOF
 fi
 
 echo ""
@@ -242,6 +382,7 @@ echo "Commands:"
 echo "  matrix        - Run the full startup sequence"
 echo "  matrix-demo   - Reset lock and re-trigger animation"
 echo "  matrix-rain   - Endless falling code"
+echo "  matrix-off    - CRT shutdown animation + exit"
 echo "  matrix-config - Interactive configuration (shader, animation, more)"
 echo ""
 echo "Next steps:"

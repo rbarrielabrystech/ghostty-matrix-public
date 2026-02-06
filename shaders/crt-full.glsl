@@ -67,6 +67,24 @@
 // Green phosphor glow color (P1 phosphor: warm green)
 #define GLOW_COLOR vec3(0.1, 1.0, 0.3)
 
+// --- Enhanced CRT Effects (opt-in, uncomment to enable) ---
+
+// Static noise - film grain / signal noise
+// #define ENABLE_NOISE 1
+#define NOISE_AMOUNT 0.03
+
+// Horizontal jitter - per-scanline signal instability
+// #define ENABLE_JITTER 1
+#define JITTER_AMOUNT 0.001
+
+// Interlacing - alternating field darkening
+// #define ENABLE_INTERLACE 1
+#define INTERLACE_AMOUNT 0.06
+
+// Halation - wide-spread bloom from internal glass reflections
+// #define ENABLE_HALATION 1
+#define HALATION_AMOUNT 0.08
+
 float FromSrgb1(float c) {
   return (c <= 0.04045) ? c * (1.0 / 12.92) :
   pow(c * (1.0 / 1.055) + (0.055 / 1.055), 2.4);
@@ -254,6 +272,15 @@ vec3 sampleBloom(vec2 uv, vec2 texelSize) {
   return bloom / 8.0;
 }
 
+// Procedural hash for noise/jitter
+#if defined(ENABLE_NOISE) || defined(ENABLE_JITTER)
+float hash(vec2 p) {
+    p = fract(p * vec2(443.897, 441.423));
+    p += dot(p, p + 19.19);
+    return fract(p.x * p.y);
+}
+#endif
+
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   float aspect = iResolution.x / iResolution.y;
   vec2 texelSize = 1.0 / iResolution.xy;
@@ -262,9 +289,19 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   // Gentle barrel distortion: 1/45 (slight bump from original 1/50)
   vec2 warp = vec2(1.0 / (45.0 * aspect), 1.0 / 45.0);
 
+  // --- Horizontal jitter (signal instability) ---
+  vec2 jitteredCoord = fragCoord.xy;
+  #ifdef ENABLE_JITTER
+  {
+      float scanline = floor(fragCoord.y);
+      float jit = (hash(vec2(scanline, iTime * 60.0)) - 0.5) * 2.0;
+      jitteredCoord.x += jit * JITTER_AMOUNT * iResolution.x;
+  }
+  #endif
+
   // Core CRT filter
   fragColor.rgb = CrtsFilter(
-      fragCoord.xy,
+      jitteredCoord,
       vec2(1.0),
       iResolution.xy * SCALE * 0.5,
       1.0 / (iResolution.xy * SCALE),
@@ -281,6 +318,14 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   // --- Phosphor bloom ---
   vec3 bloom = sampleBloom(uv, texelSize);
   fragColor.rgb += bloom * BLOOM_AMOUNT;
+
+  // --- Halation (internal glass reflections) ---
+  #ifdef ENABLE_HALATION
+  {
+      vec3 wideBloom = sampleBloom(uv, texelSize * 4.0);
+      fragColor.rgb += wideBloom * HALATION_AMOUNT;
+  }
+  #endif
 
   // --- Green phosphor glow (P1 monochrome CRT) ---
   float luma = dot(bloom, vec3(0.2126, 0.7152, 0.0722));
@@ -301,9 +346,27 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   fragColor.r = mix(fragColor.r, rShift * PHOSPHOR_BOOST, chromaBlend);
   fragColor.b = mix(fragColor.b, bShift * PHOSPHOR_BOOST, chromaBlend);
 
+  // --- Interlacing (alternating field darkening) ---
+  #ifdef ENABLE_INTERLACE
+  {
+      float field = mod(floor(iTime * 60.0), 2.0);
+      float scanline = mod(floor(fragCoord.y), 2.0);
+      float interlace = 1.0 - INTERLACE_AMOUNT * step(0.5, abs(scanline - field));
+      fragColor.rgb *= interlace;
+  }
+  #endif
+
   // --- 60Hz flicker ---
   float flicker = 1.0 - FLICKER_AMOUNT * sin(iTime * 120.0 * 3.14159);
   fragColor.rgb *= flicker;
+
+  // --- Static noise (signal grain) ---
+  #ifdef ENABLE_NOISE
+  {
+      float noise = (hash(fragCoord.xy + iTime * 1000.0) - 0.5) * 2.0 * NOISE_AMOUNT;
+      fragColor.rgb += noise;
+  }
+  #endif
 
   // --- Edge shadow (tube glass rim) ---
   vec2 edgeUV = uv * 2.0 - 1.0;

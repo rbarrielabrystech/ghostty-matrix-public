@@ -10,7 +10,8 @@ A Matrix-inspired terminal theme for Ghostty with authentic 1999 aesthetics.
 - **bloom.glsl** - Phosphor glow effect (recommended, readable)
 - **matrix-glow.glsl** - Subtle green glow variant
 - **crt.glsl** - CRT scanlines only (no curvature)
-- **crt-full.glsl** - Full 1999 CRT (curvature + scanlines + shadow mask + vignette)
+- **crt-full.glsl** - Full 1999 CRT (curvature + scanlines + shadow mask + vignette + optional noise/jitter/interlace/halation)
+- **crt-shutdown.glsl** - CRT power-down animation (brightness spike + collapse + phosphor afterglow)
 
 ### cxxmatrix
 High-fidelity Matrix rain animation from https://github.com/akinomyoga/cxxmatrix
@@ -30,6 +31,7 @@ matrix-conway     # Conway's Game of Life
 matrix-mandelbrot # Mandelbrot fractal
 matrix-full       # Complete show (all modes)
 matrix-demo       # Reset lock and re-trigger
+matrix-off        # CRT shutdown animation + exit
 matrix-config     # Interactive configuration menu
 ```
 
@@ -43,7 +45,7 @@ matrix-config     # Interactive configuration menu
 - Shell integration: `~/.zshrc` or `~/.bashrc`
 
 ## Presets (via matrix-config)
-- **Full 1999 CRT** - crt-full.glsl, curvature, scanlines, shadow mask, solid BG, thick font
+- **Full 1999 CRT** - crt-full.glsl, curvature, scanlines, shadow mask, solid BG, thick font, noise + interlace enabled
 - **CRT Lite** - crt.glsl, scanlines only, no curvature
 - **Phosphor Bloom** - bloom.glsl, soft glow (recommended default)
 - **Subtle Glow** - matrix-glow.glsl, minimal effect
@@ -56,6 +58,12 @@ matrix-config     # Interactive configuration menu
 - `MATRIX_SHOW_QUOTE` - true/false
 - `MATRIX_CUSTOM_QUOTES` - pipe-separated custom quotes
 - `MATRIX_ALLOW_SKIP` - true/false
+- `MATRIX_SHUTDOWN_ANIMATION` - true/false (CRT power-down on matrix-off)
+- `MATRIX_SHUTDOWN_ON_EXIT` - true/false (auto-trigger on exit)
+- `MATRIX_CRT_NOISE` - true/false (static noise, crt-full only)
+- `MATRIX_CRT_JITTER` - true/false (horizontal jitter, crt-full only)
+- `MATRIX_CRT_INTERLACE` - true/false (interlacing, crt-full only)
+- `MATRIX_CRT_HALATION` - true/false (enhanced halation, crt-full only)
 
 ## Ghostty Config
 - `custom-shader = bloom.glsl` - Active shader

@@ -13,8 +13,10 @@ High-fidelity Matrix (1999) terminal setup for [Ghostty](https://ghostty.org/).
 - **Authentic Matrix rain** using [cxxmatrix](https://github.com/akinomyoga/cxxmatrix) with half-width katakana
 - **Movie-accurate startup sequence**: number fall → rain → "WAKE UP NEO" banner → "Follow the white rabbit."
 - **Full 1999 CRT mode**: barrel distortion, scanlines, shadow mask, vignette — like sitting in front of a CRT monitor in 1999
-- **4 shader effects**: CRT Full, CRT Scanlines, Phosphor Bloom, Matrix Glow
-- **Interactive configuration TUI** (`matrix-config`): presets, shader picker, 18+ settings
+- **CRT shutdown animation**: authentic power-down effect (brightness spike → vertical collapse → phosphor afterglow)
+- **Enhanced CRT effects**: toggleable static noise, horizontal jitter, interlacing, and halation
+- **5 shader effects**: CRT Full, CRT Scanlines, Phosphor Bloom, Matrix Glow, CRT Shutdown
+- **Interactive configuration TUI** (`matrix-config`): presets, shader picker, CRT effects, shutdown config, 25+ settings
 - **5 one-click presets**: Full 1999 CRT, CRT Lite, Phosphor Bloom, Subtle Glow, Clean Terminal
 - **Phosphor-green color scheme** with accurate `#0d0208` background
 - **Fully configurable**: animation frequency, duration, sequences, colors, quotes, and more
@@ -59,7 +61,7 @@ This opens a full TUI with two screens:
 
 | Preset | Shader | Description |
 |--------|--------|-------------|
-| **Full 1999 CRT** | `crt-full.glsl` | Curvature + scanlines + shadow mask + vignette, solid BG, thick font |
+| **Full 1999 CRT** | `crt-full.glsl` | Curvature + scanlines + shadow mask + vignette, noise + interlace, shutdown animation |
 | **CRT Lite** | `crt.glsl` | Scanlines without curvature, slightly transparent |
 | **Phosphor Bloom** | `bloom.glsl` | Soft glow around text, very readable (recommended) |
 | **Subtle Glow** | `matrix-glow.glsl` | Minimal green glow, for daily driving |
@@ -75,6 +77,8 @@ Press `c` from the presets screen to access individual controls:
 | **Animation** | Frequency, duration, sequence, text sequence, typing speed, skip, diffuse, twinkle |
 | **Terminal** | Font thicken (phosphor), font size, background opacity, cursor style/blink, window padding |
 | **Header** | Show/hide header, quote, system info |
+| **CRT Effects** | Static noise, horizontal jitter, interlacing, enhanced halation (crt-full only) |
+| **Shutdown** | CRT shutdown effect on/off, auto-trigger on exit |
 
 ### Manual Configuration
 
@@ -101,6 +105,12 @@ nano ~/.config/ghostty/config
 | `MATRIX_SEQUENCE` | see below | number,rain,banner | cxxmatrix animation sequence |
 | `MATRIX_DIFFUSE` | true, false | true | Background glow in animation |
 | `MATRIX_TWINKLE` | true, false | true | Brightness fluctuations |
+| `MATRIX_SHUTDOWN_ANIMATION` | true, false | true | CRT power-down on `matrix-off` |
+| `MATRIX_SHUTDOWN_ON_EXIT` | true, false | false | Auto-trigger shutdown on `exit` |
+| `MATRIX_CRT_NOISE` | true, false | false | Static noise (crt-full only) |
+| `MATRIX_CRT_JITTER` | true, false | false | Horizontal jitter (crt-full only) |
+| `MATRIX_CRT_INTERLACE` | true, false | false | Interlacing (crt-full only) |
+| `MATRIX_CRT_HALATION` | true, false | false | Enhanced halation (crt-full only) |
 
 See `matrix.conf` for all available options.
 
@@ -123,6 +133,7 @@ Press any key to skip at any point.
 matrix-config       # Interactive configuration TUI
 matrix              # Run full startup sequence
 matrix-demo         # Reset lock and re-trigger animation
+matrix-off          # CRT shutdown animation + exit
 matrix-rain         # Endless katakana rain
 matrix-conway       # Conway's Game of Life
 matrix-mandelbrot   # Mandelbrot fractal zoom
@@ -135,10 +146,11 @@ Located in `shaders/`. Switch between them via `matrix-config` or edit `~/.confi
 
 | Shader | Description | Effect | CPU Usage |
 |--------|-------------|--------|-----------|
-| `crt-full.glsl` | Full 1999 CRT | Barrel distortion, scanlines, shadow mask, vignette | Medium |
+| `crt-full.glsl` | Full 1999 CRT | Barrel distortion, scanlines, shadow mask, vignette, optional noise/jitter/interlace/halation | Medium |
 | `crt.glsl` | CRT Scanlines | Scanlines only, no curvature | Medium |
 | `bloom.glsl` | Phosphor Bloom (recommended) | Soft glow around bright text | Low |
 | `matrix-glow.glsl` | Matrix Glow | Subtle green glow, minimal | Low |
+| `crt-shutdown.glsl` | CRT Shutdown | Power-down animation (used internally by `matrix-off`) | Low |
 
 To change shader manually:
 ```bash
@@ -152,6 +164,33 @@ To disable shaders:
 # custom-shader = ...
 ```
 
+### CRT Shutdown Animation
+
+Run `matrix-off` to trigger a classic CRT power-down sequence before closing the terminal:
+
+1. **Brightness spike** (0.0-0.25s) — capacitor discharge, screen flashes white-green
+2. **Vertical collapse** (0.25-0.70s) — screen squeezes to a horizontal line
+3. **Horizontal shrink** (0.70-1.10s) — line collapses to a center dot
+4. **Phosphor afterglow** (1.10-1.60s) — green dot fades with P1 phosphor color
+5. **Black** (1.60s+) — terminal exits
+
+This works by exploiting Ghostty's shader hot-reload (1.2.0+) — the shell function swaps the active shader to `crt-shutdown.glsl`, waits for the animation, restores the original shader, then exits. In non-Ghostty terminals, `matrix-off` simply exits.
+
+To auto-trigger on every `exit`, set `MATRIX_SHUTDOWN_ON_EXIT=true` in `matrix.conf`.
+
+### Enhanced CRT Effects (crt-full only)
+
+When using the `crt-full.glsl` shader, four additional effects can be toggled via `matrix-config` (Custom > CRT Effects) or by editing the shader directly:
+
+| Effect | Description | Default |
+|--------|-------------|---------|
+| **Static Noise** | Film grain / signal noise | Off |
+| **Horizontal Jitter** | Per-scanline signal instability | Off |
+| **Interlacing** | Alternating field darkening (60Hz) | Off |
+| **Enhanced Halation** | Wide-spread bloom from internal glass reflections | Off |
+
+The **Full 1999 CRT** preset enables noise + interlacing automatically. Changes take effect in real-time via Ghostty's shader hot-reload.
+
 ## File Structure
 
 ```
@@ -162,7 +201,8 @@ To disable shaders:
 ├── matrix-startup.sh     # Full animation script
 ├── matrix-header.sh      # Header-only script
 └── shaders/
-    ├── crt-full.glsl     # Full 1999 CRT (curvature + mask)
+    ├── crt-full.glsl     # Full 1999 CRT (curvature + mask + optional effects)
+    ├── crt-shutdown.glsl # CRT power-down animation
     ├── crt.glsl          # CRT scanlines only
     ├── bloom.glsl        # Phosphor bloom (default)
     └── matrix-glow.glsl  # Subtle green glow
@@ -264,6 +304,13 @@ ls -la ~/Library/Application\ Support/com.mitchellh.ghostty/config
 1. Ensure path is correct in config
 2. Press `Cmd+Shift+,` (macOS) or restart Ghostty
 3. Check Ghostty supports custom shaders
+
+### `matrix-off` not animating?
+
+- Requires Ghostty 1.2.0+ (shader hot-reload support)
+- Check that `MATRIX_SHUTDOWN_ANIMATION=true` in `~/.config/ghostty/matrix.conf`
+- Verify `crt-shutdown.glsl` exists: `ls ~/.config/ghostty/shaders/crt-shutdown.glsl`
+- Only works in interactive Ghostty shells (falls back to plain `exit` elsewhere)
 
 ### cxxmatrix build fails?
 

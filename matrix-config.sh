@@ -210,6 +210,48 @@ set_shader() {
 
 toggle() { [ "$1" = "true" ] && echo "false" || echo "true"; }
 
+# ============================================================
+# SHADER DEFINE HELPERS
+# ============================================================
+# Read whether a #define ENABLE_X is active (uncommented) in a shader file
+read_shader_define() {
+    local shader_file="$1" define_name="$2"
+    if [ -f "$shader_file" ]; then
+        # Active = uncommented line like: #define ENABLE_NOISE 1
+        if grep -qE "^#define ${define_name} " "$shader_file" 2>/dev/null; then
+            echo "true"
+            return
+        fi
+    fi
+    echo "false"
+}
+
+# Toggle a #define line between commented and uncommented
+toggle_shader_define() {
+    local shader_file="$1" define_name="$2"
+    if [ ! -f "$shader_file" ]; then return; fi
+    local current
+    current=$(read_shader_define "$shader_file" "$define_name")
+    if [ "$current" = "true" ]; then
+        # Comment it out
+        _sed_inplace "s|^#define ${define_name} |// #define ${define_name} |" "$shader_file"
+    else
+        # Uncomment it
+        _sed_inplace "s|^// *#define ${define_name} |#define ${define_name} |" "$shader_file"
+    fi
+}
+
+# Set a #define to a specific state (true=uncommented, false=commented)
+set_shader_define() {
+    local shader_file="$1" define_name="$2" state="$3"
+    if [ ! -f "$shader_file" ]; then return; fi
+    if [ "$state" = "true" ]; then
+        _sed_inplace "s|^// *#define ${define_name} |#define ${define_name} |" "$shader_file"
+    else
+        _sed_inplace "s|^#define ${define_name} |// #define ${define_name} |" "$shader_file"
+    fi
+}
+
 cycle_freq() {
     case "$1" in
         daily)  echo "weekly" ;;
@@ -255,6 +297,13 @@ apply_preset() {
             write_matrix_conf "MATRIX_DIFFUSE" "true"
             write_matrix_conf "MATRIX_TWINKLE" "true"
             write_matrix_conf "MATRIX_SEQUENCE" "number,rain,banner"
+            # Enable enhanced CRT effects
+            write_matrix_conf "MATRIX_CRT_NOISE" "true"
+            write_matrix_conf "MATRIX_CRT_INTERLACE" "true"
+            write_matrix_conf "MATRIX_SHUTDOWN_ANIMATION" "true"
+            local crt_shader="${SHADER_DIR}/crt-full.glsl"
+            set_shader_define "$crt_shader" "ENABLE_NOISE" "true"
+            set_shader_define "$crt_shader" "ENABLE_INTERLACE" "true"
             STATUS_MSG="PRESET APPLIED: Full 1999 CRT -- restart Ghostty"
             ;;
         crt-lite)
@@ -451,6 +500,33 @@ screen_custom() {
     box_kv "g) Show Header" "[$(on_off $header)]"
     box_kv "h) Show Quote" "[$(on_off $quote)]"
     box_kv "i) Show System Info" "[$(on_off $sysinfo)]"
+    box_empty
+
+    # -- CRT EFFECTS (only shown for crt-full shader) --
+    if [ "$shader" = "crt-full" ]; then
+        local crt_shader="${SHADER_DIR}/crt-full.glsl"
+        local noise_on=$(read_shader_define "$crt_shader" "ENABLE_NOISE")
+        local jitter_on=$(read_shader_define "$crt_shader" "ENABLE_JITTER")
+        local interlace_on=$(read_shader_define "$crt_shader" "ENABLE_INTERLACE")
+        local halation_on=$(read_shader_define "$crt_shader" "ENABLE_HALATION")
+
+        box_thin
+        box_center "CRT EFFECTS (crt-full)" "$YELLOW"
+        box_kv "j) Static Noise" "[$(on_off $noise_on)]"
+        box_kv "k) Horizontal Jitter" "[$(on_off $jitter_on)]"
+        box_kv "l) Interlacing" "[$(on_off $interlace_on)]"
+        box_kv "n) Enhanced Halation" "[$(on_off $halation_on)]"
+        box_empty
+    fi
+
+    # -- SHUTDOWN --
+    local shutdown=$(read_matrix_conf "MATRIX_SHUTDOWN_ANIMATION" "true")
+    local shutdown_exit=$(read_matrix_conf "MATRIX_SHUTDOWN_ON_EXIT" "false")
+
+    box_thin
+    box_center "SHUTDOWN ANIMATION" "$YELLOW"
+    box_kv "s) CRT Shutdown Effect" "[$(on_off $shutdown)]"
+    box_kv "t) Auto-trigger on exit" "[$(on_off $shutdown_exit)]"
     box_empty
 
     # -- ACTIONS --
@@ -724,6 +800,44 @@ while true; do
                 cur=$(read_matrix_conf "MATRIX_SHOW_SYSTEM_INFO" "true")
                 write_matrix_conf "MATRIX_SHOW_SYSTEM_INFO" "$(toggle "$cur")"
                 STATUS_MSG="System info: $(on_off $(toggle "$cur"))"
+                ;;
+            j|J)
+                local crt_shader="${SHADER_DIR}/crt-full.glsl"
+                toggle_shader_define "$crt_shader" "ENABLE_NOISE"
+                local new_state=$(read_shader_define "$crt_shader" "ENABLE_NOISE")
+                write_matrix_conf "MATRIX_CRT_NOISE" "$new_state"
+                STATUS_MSG="Static noise: $(on_off $new_state)"
+                ;;
+            k|K)
+                local crt_shader="${SHADER_DIR}/crt-full.glsl"
+                toggle_shader_define "$crt_shader" "ENABLE_JITTER"
+                local new_state=$(read_shader_define "$crt_shader" "ENABLE_JITTER")
+                write_matrix_conf "MATRIX_CRT_JITTER" "$new_state"
+                STATUS_MSG="Horizontal jitter: $(on_off $new_state)"
+                ;;
+            l|L)
+                local crt_shader="${SHADER_DIR}/crt-full.glsl"
+                toggle_shader_define "$crt_shader" "ENABLE_INTERLACE"
+                local new_state=$(read_shader_define "$crt_shader" "ENABLE_INTERLACE")
+                write_matrix_conf "MATRIX_CRT_INTERLACE" "$new_state"
+                STATUS_MSG="Interlacing: $(on_off $new_state)"
+                ;;
+            n|N)
+                local crt_shader="${SHADER_DIR}/crt-full.glsl"
+                toggle_shader_define "$crt_shader" "ENABLE_HALATION"
+                local new_state=$(read_shader_define "$crt_shader" "ENABLE_HALATION")
+                write_matrix_conf "MATRIX_CRT_HALATION" "$new_state"
+                STATUS_MSG="Enhanced halation: $(on_off $new_state)"
+                ;;
+            s|S)
+                cur=$(read_matrix_conf "MATRIX_SHUTDOWN_ANIMATION" "true")
+                write_matrix_conf "MATRIX_SHUTDOWN_ANIMATION" "$(toggle "$cur")"
+                STATUS_MSG="CRT shutdown: $(on_off $(toggle "$cur"))"
+                ;;
+            t|T)
+                cur=$(read_matrix_conf "MATRIX_SHUTDOWN_ON_EXIT" "false")
+                write_matrix_conf "MATRIX_SHUTDOWN_ON_EXIT" "$(toggle "$cur")"
+                STATUS_MSG="Auto-shutdown on exit: $(on_off $(toggle "$cur"))"
                 ;;
             p|P)
                 clear
