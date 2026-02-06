@@ -41,7 +41,7 @@ tso_login() {
     era_hide_cursor
     printf "${c_green}"
     era_move 2 26; printf "TSO/E LOGON"
-    era_move 3 26; printf "-----------"
+    era_move 3 26; printf '%s' "-----------"
     era_move 5 10; printf "IKJ56700A ENTER USERID -"
     era_move 6 10; printf "USERID    ===>"
     era_move 7 10; printf "PASSWORD  ===>"
@@ -59,7 +59,7 @@ tso_login() {
     printf "${c_bright}"
     read -rn 8 USERID
     [ -z "$USERID" ] && USERID="USER01"
-    USERID="${USERID^^}"
+    USERID="$(_upper "$USERID")"
     era_move 7 25
     read -rsn 8 _pass
     printf "${c_reset}"
@@ -104,7 +104,7 @@ ispf_main() {
         local opt=""
         read -rn 1 opt
         printf "${c_reset}"
-        case "${opt^^}" in
+        case "$(_upper "$opt")" in
             0) settings_panel ;;
             3) utility_menu ;;
             6) tso_command ;;
@@ -222,7 +222,7 @@ tso_command() {
         read -r cmd
         printf "${c_reset}"
         [ -z "$cmd" ] && return
-        cmd="${cmd^^}"
+        cmd="$(_upper "$cmd")"
         era_move "$row" 3
         printf "${c_green}"
         case "$cmd" in

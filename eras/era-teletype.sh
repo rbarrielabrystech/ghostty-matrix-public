@@ -6,7 +6,8 @@ era_setup_traps
 
 # --- Teletype output: 10 chars/sec ---
 tty_print() {
-    local text="${1^^}" i ch
+    local text i ch
+    text=$(_upper "$1")
     for (( i=0; i<${#text}; i++ )); do
         ch="${text:$i:1}"
         if [[ "$ch" == $'\007' ]]; then
@@ -28,7 +29,8 @@ tty_line() {
 
 # --- Paper tape visual (8-hole ASCII encoding) ---
 punch_tape() {
-    local text="${1^^}" i ch byte bit holes="" labels=""
+    local text i ch byte bit holes="" labels=""
+    text=$(_upper "$1")
     tty_println "PUNCHING TAPE..."
     for (( i=0; i<${#text}; i++ )); do
         ch="${text:$i:1}"; byte=$(printf '%d' "'$ch")
@@ -50,7 +52,7 @@ tty_readline() {
             $'\x7f'|$'\x08')
                 [[ -n "$line" ]] && { line="${line%?}"; printf '\xe2\x86\x90'; } ;;
             '')  sleep 0.3; echo; break ;;
-            *)   ch="${ch^^}"; printf '%s' "$ch"; line+="$ch" ;;
+            *)   ch=$(_upper "$ch"); printf '%s' "$ch"; line+="$ch" ;;
         esac
     done
     echo "$line"
@@ -79,7 +81,7 @@ standalone_mode() {
     while true; do
         local input
         input=$(tty_readline "")
-        input="${input^^}"
+        input=$(_upper "$input")
         [[ -z "$input" ]] && continue
         case "$input" in
             BYE|QUIT|EXIT)

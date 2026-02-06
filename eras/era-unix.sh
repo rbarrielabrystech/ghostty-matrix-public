@@ -250,7 +250,7 @@ main() {
         IFS= read -rep "$PS_PROMPT" line || break
         [[ -z "$line" ]] && continue
         # Amiga alias: DIR -> ls
-        [[ "$ERA" == "amiga" ]] && [[ "${line^^}" == DIR* ]] && line="ls${line:3}"
+        [[ "$ERA" == "amiga" ]] && [[ "$(_upper "$line")" == DIR* ]] && line="ls${line:3}"
         local cmd args; read -r cmd args <<< "$line"
         local -a argv; read -ra argv <<< "$args"
         case "$cmd" in

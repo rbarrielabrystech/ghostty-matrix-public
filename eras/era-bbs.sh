@@ -160,7 +160,7 @@ main_menu() {
         echo
         local choice
         choice=$(bbs_prompt "Command")
-        case "${choice^^}" in
+        case "$(_upper "$choice")" in
             M) message_bases ;;
             F) file_areas ;;
             D) door_games ;;
@@ -187,7 +187,7 @@ message_bases() {
         echo
         local choice
         choice=$(bbs_prompt "Area")
-        case "${choice^^}" in
+        case "$(_upper "$choice")" in
             1) read_messages "General Discussion" "$MSG_GENERAL1" "$MSG_GENERAL2" ;;
             2) read_messages "Programming" "$MSG_PROG1" ;;
             3) read_messages "Warez/Trading" "$MSG_WAREZ1" ;;
@@ -266,7 +266,7 @@ file_areas() {
         echo
         local choice
         choice=$(bbs_prompt "File #")
-        case "${choice^^}" in
+        case "$(_upper "$choice")" in
             [1-4]) download_file "$((choice - 1))" ;;
             Q) return ;;
         esac
@@ -360,7 +360,7 @@ door_games() {
     echo
     local choice
     choice=$(bbs_prompt "Door")
-    case "${choice^^}" in
+    case "$(_upper "$choice")" in
         1) dragons_lair ;;
     esac
 }
@@ -381,7 +381,7 @@ dragons_lair() {
         dl_show_room
         local cmd
         cmd=$(bbs_prompt "N/S/E/W/Q")
-        case "${cmd^^}" in
+        case "$(_upper "$cmd")" in
             N) dl_move 0 ;;
             S) dl_move 1 ;;
             E) dl_move 2 ;;

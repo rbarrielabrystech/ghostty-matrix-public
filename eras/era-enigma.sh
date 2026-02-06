@@ -255,17 +255,17 @@ setup_screen() {
     read -r rs; [[ "$rs" =~ ^[0-9]+$ ]] && ((rs>=1 && rs<=26)) && RING_R=$((rs-1))
     echo ""
     _num_to_chr "$POS_L"; printf '  Start position LEFT (A-Z) [current: %s]: ' "$RET"
-    read -rn1 inp; echo; inp="${inp^^}"
+    read -rn1 inp; echo; inp="$(_upper "$inp")"
     [[ "$inp" =~ [A-Z] ]] && { _chr_to_num "$inp"; POS_L=$RET; }
     _num_to_chr "$POS_M"; printf '  Start position MIDDLE (A-Z) [current: %s]: ' "$RET"
-    read -rn1 inp; echo; inp="${inp^^}"
+    read -rn1 inp; echo; inp="$(_upper "$inp")"
     [[ "$inp" =~ [A-Z] ]] && { _chr_to_num "$inp"; POS_M=$RET; }
     _num_to_chr "$POS_R"; printf '  Start position RIGHT (A-Z) [current: %s]: ' "$RET"
-    read -rn1 inp; echo; inp="${inp^^}"
+    read -rn1 inp; echo; inp="$(_upper "$inp")"
     [[ "$inp" =~ [A-Z] ]] && { _chr_to_num "$inp"; POS_R=$RET; }
     local cur_ref="B"; [[ "$REFLECTOR" != "$REFLECTOR_B" ]] && cur_ref="C"
     printf '  Reflector (B/C) [current: %s]: ' "$cur_ref"
-    read -rn1 inp; echo; inp="${inp^^}"
+    read -rn1 inp; echo; inp="$(_upper "$inp")"
     [[ "$inp" == "C" ]] && REFLECTOR="$REFLECTOR_C" || REFLECTOR="$REFLECTOR_B"
     echo ""
     printf '  Plugboard pairs (e.g. AB CD EF, up to 13 pairs, blank=clear): '
@@ -273,7 +273,7 @@ setup_screen() {
     init_plugboard
     if [[ -n "$pp" ]]; then
         for pair in $pp; do
-            pair="${pair^^}"
+            pair="$(_upper "$pair")"
             if [[ ${#pair} -eq 2 ]]; then
                 local a="${pair:0:1}" b="${pair:1:1}"
                 [[ "$a" =~ [A-Z] && "$b" =~ [A-Z] ]] && add_plug_pair "$a" "$b"
@@ -326,7 +326,7 @@ cipher_mode() {
             era_move 20 1; era_fg 100 100 100; printf '  >'
             continue
         fi
-        ch="${ch^^}"
+        ch="$(_upper "$ch")"
         [[ ! "$ch" =~ [A-Z] ]] && continue
         encrypt_char "$ch"; lit=$RET
         INPUT_TEXT+="$ch"; OUTPUT_TEXT+="$lit"
@@ -356,7 +356,7 @@ main_menu() {
         printf '    [X] Exit\n'
         echo ""; era_fg 180 180 180
         printf '    Select option: '; era_show_cursor
-        local key; read -rsn1 key; key="${key^^}"
+        local key; read -rsn1 key; key="$(_upper "$key")"
         case "$key" in
             S) setup_screen ;;
             E) cipher_mode "ENCRYPT" ;;

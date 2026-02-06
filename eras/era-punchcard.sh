@@ -66,7 +66,8 @@ row_index() {
 }
 
 punch_char() {
-    local ch="${1^^}"  # uppercase
+    local ch
+    ch=$(_upper "$1")
     local col="$CURSOR_COL"
     if (( col >= CARD_COLS )); then return 1; fi
     local rows_to_punch

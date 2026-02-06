@@ -18,6 +18,11 @@ read_matrix_conf() {
 
 era_name() { read_matrix_conf "MATRIX_ERA" ""; }
 
+# --- Portable helpers (bash 3.2 lacks ${var^^}) ---
+
+_upper() { echo "$1" | tr 'a-z' 'A-Z'; }
+_lower() { echo "$1" | tr 'A-Z' 'a-z'; }
+
 # --- Terminal output ---
 
 # Slow character-by-character typing (like a real terminal/printer)
