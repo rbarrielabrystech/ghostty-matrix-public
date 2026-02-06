@@ -196,84 +196,306 @@ When using the `crt-full.glsl` shader, four additional effects can be toggled vi
 
 The **Full 1999 CRT** preset enables noise + interlacing automatically. Changes take effect in real-time via Ghostty's shader hot-reload.
 
-## Terminal Eras - Time Machine
+## Terminal Eras — Time Machine
 
-Transform your terminal into any classic computer from the 1940s to 2000. Access via `matrix-config` > `e) Terminal Eras...`.
+Transform your terminal into any classic computer from the 1940s to 2000. Each era is a living, interactive experience — you don't just read about punch cards, you punch them.
 
-Each era applies:
-- **Authentic color palette** (16 ANSI colors + background/foreground)
-- **Period-correct CRT shader** (green phosphor, amber phosphor, white, or color)
-- **Boot message** (the exact text you'd see powering on the real machine)
-- **Interactive simulation** (optional - a working punch card, BASIC interpreter, etc.)
+Access via `matrix-config` > `e) Terminal Eras...`.
+
+### How It Works
+
+When you select an era, four things change simultaneously:
+
+1. **Color palette** — All 16 ANSI colors, background, foreground, and cursor are set to match the original hardware. The Commodore 64 gets its Pepto-measured blue palette. The VT100 gets green phosphor. The ZX Spectrum gets its 8+8 bright/normal scheme.
+
+2. **CRT shader** — Early terminals get the `retro-crt.glsl` shader with the correct phosphor color (green for VT100/Apple II, amber for VT220, white for TRS-80). Color systems like the C64 get CRT effects without phosphor tinting. Pre-CRT machines (punch cards, teletypes) get no shader at all — they didn't have screens.
+
+3. **Boot message** — Every new terminal window displays the exact startup text you'd see powering on the real machine. The C64 shows `**** COMMODORE 64 BASIC V2 ****` / `64K RAM SYSTEM  38911 BASIC BYTES FREE`. The Linux era boots through LILO with kernel messages and BogoMIPS calibration.
+
+4. **Interactive simulation** (optional) — With interactive mode enabled, the era's simulator launches automatically. A working BASIC interpreter, a functional punch card machine, a real Enigma cipher — not mockups, but actual implementations you can use.
+
+### Quick Start
+
+```bash
+matrix-config          # Open configuration TUI
+                       # Press 'e' for Terminal Eras
+                       # Select a category (1-9)
+                       # Pick an era
+                       # Press 'i' to toggle interactive mode
+```
+
+Or launch an era boot directly:
+
+```bash
+matrix-era             # Show current era's boot sequence
+```
+
+To return to the default Matrix theme, press `m` in the Terminal Eras menu.
 
 ### All 30 Eras
 
-| Era | Period | Interactive | Description |
-|-----|--------|-------------|-------------|
-| **Enigma Machine** | 1940s | Rotor encryption simulator | Real M3 rotor wirings, plugboard, lampboard |
-| **Colossus** | 1940s | Boot only | Bletchley Park codebreaking computer |
-| **IBM Punch Card** | 1950s | Keypunch simulator | Type characters, see Hollerith punches, submit card deck |
-| **Teletype ASR-33** | 1960s | 10 cps teletype | Slow printing, uppercase only, paper tape |
-| **Line Printer** | 1960s | Boot only | IBM 1403 greenbar output |
-| **IBM 3270** | 1970s | Block-mode terminal | TSO login, ISPF panels, forms-based input |
-| **IBM System/360** | 1960s | Boot only | Mainframe IPL sequence |
-| **DEC PDP-8** | 1960s | Front panel | LED display, toggle switches, octal entry |
-| **DEC VT100** | 1978 | Unix shell | Green phosphor, BSD 4.2 |
-| **DEC VT220** | 1983 | Unix shell | Amber phosphor, VMS-style |
-| **Altair 8800** | 1975 | Front panel | Toggle in programs, Kill the Bit game |
-| **Apple II** | 1977 | BASIC interpreter | Applesoft BASIC, green phosphor |
-| **Commodore PET** | 1977 | BASIC interpreter | Commodore BASIC, green CRT |
-| **TRS-80** | 1977 | BASIC interpreter | Level II BASIC, white phosphor |
-| **Commodore 64** | 1982 | BASIC interpreter | BASIC V2, blue-on-blue Pepto palette |
-| **ZX Spectrum** | 1982 | BASIC interpreter | Keyword entry mode (P=PRINT) |
-| **BBC Micro** | 1981 | BASIC interpreter | BBC BASIC |
-| **Amstrad CPC** | 1984 | BASIC interpreter | Locomotive BASIC, yellow-on-blue |
-| **MSX** | 1983 | BASIC interpreter | MSX-BASIC, white-on-blue |
-| **Atari 800** | 1979 | BASIC interpreter | Atari BASIC |
-| **Commodore Amiga** | 1985 | Unix shell | AmigaDOS Workbench |
-| **IBM MDA** | 1981 | DOS prompt | Green phosphor, DOS 3.30 |
-| **IBM CGA** | 1981 | DOS prompt | Color graphics adapter |
-| **MS-DOS** | 1991 | DOS prompt | DOS 6.22, DIR/CD/TYPE/MEM |
-| **Sun Solaris** | 1997 | Unix shell | SunOS 5.6, sparc workstation |
-| **SGI IRIX** | 1998 | Unix shell | Silicon Graphics |
-| **NeXT** | 1995 | Unix shell | NeXTSTEP 3.3, grayscale |
-| **BBS Terminal** | 1993 | Full BBS | Modem connect, ANSI art, message boards, door games |
-| **Early Linux** | 1998 | Unix shell | Slackware 3.6, LILO boot, kernel 2.0 |
-| **Windows 98** | 1998 | DOS prompt | MS-DOS under Windows |
+#### WWII Computing (1940s)
 
-### Using Terminal Eras
+| # | Era | Simulation | Description |
+|---|-----|-----------|-------------|
+| 1 | **Enigma Machine** | Rotor encryption | Authentic M3 with 5 rotors, reflector B, plugboard, real-time stepping |
+| 2 | **Colossus** | Boot message | Bletchley Park's codebreaking computer, vacuum tube status display |
 
-```bash
-matrix-config    # Open config TUI
-# Press 'e' for Terminal Eras
-# Select a category (1-9)
-# Select an era
-# Press 'i' to toggle interactive mode
-```
+#### Pre-CRT Era (1950s-1960s)
 
-When an era is active, new terminals show the boot message. With interactive mode enabled (`MATRIX_ERA_INTERACTIVE=true`), the era's simulation launches automatically.
+| # | Era | Simulation | Description |
+|---|-----|-----------|-------------|
+| 3 | **IBM Punch Card** | Keypunch + reader | 80-column Hollerith encoding, card deck, JCL job processing |
+| 4 | **Teletype ASR-33** | 110 baud teletype | 10 chars/sec output, uppercase only, paper tape punching |
+| 5 | **Line Printer** | Boot message | IBM 1403 greenbar output aesthetic |
 
-To return to the Matrix theme: press `m` in the Terminal Eras menu.
+#### Mainframes (1960s-1970s)
+
+| # | Era | Simulation | Description |
+|---|-----|-----------|-------------|
+| 6 | **IBM 3270** | Block-mode terminal | TSO login, ISPF panels, dataset lists, PF keys |
+| 7 | **IBM System/360** | Boot message | Mainframe IPL sequence with channel status |
+| 8 | **DEC PDP-8** | Front panel | 12-bit octal, LED display, toggle switches, memory examine/deposit |
+
+#### Early Terminals (1970s)
+
+| # | Era | Simulation | Description |
+|---|-----|-----------|-------------|
+| 9 | **DEC VT100** | Unix shell | Green phosphor CRT, BSD 4.2 on a PDP-11/70 |
+| 10 | **DEC VT220** | Unix shell | Amber phosphor CRT, VAX/VMS 4.7 |
+| 11 | **Altair 8800** | Front panel | 16-bit address, 8-bit data, "Kill the Bit" game included |
+
+#### Home Computers (1977-1985)
+
+| # | Era | Simulation | Description |
+|---|-----|-----------|-------------|
+| 12 | **Apple II** | BASIC interpreter | Applesoft BASIC, green phosphor, uppercase-only mode |
+| 13 | **Commodore PET** | BASIC interpreter | Commodore BASIC, `*** COMMODORE BASIC ***` / `31743 BYTES FREE` |
+| 14 | **TRS-80** | BASIC interpreter | Radio Shack Level II BASIC, white phosphor CRT |
+| 15 | **Commodore 64** | BASIC interpreter | BASIC V2, authentic Pepto palette, blue-on-blue |
+| 16 | **ZX Spectrum** | BASIC interpreter | Sinclair BASIC with keyword entry (P=PRINT, G=GOTO) |
+| 17 | **BBC Micro** | BASIC interpreter | BBC BASIC, `BBC Computer 32K` / `Acorn DFS` |
+| 18 | **Amstrad CPC** | BASIC interpreter | Locomotive BASIC, yellow-on-blue |
+| 19 | **MSX** | BASIC interpreter | MSX-BASIC 1.0, white-on-blue, Microsoft copyright |
+| 20 | **Atari 800** | BASIC interpreter | Atari BASIC |
+| 21 | **Commodore Amiga** | Unix shell | AmigaDOS 3.1 / Workbench 3.1, blue/orange palette |
+
+#### IBM PC Era (1981-1995)
+
+| # | Era | Simulation | Description |
+|---|-----|-----------|-------------|
+| 22 | **IBM MDA** | DOS prompt | Monochrome Display Adapter, green phosphor, DOS 3.30 |
+| 23 | **IBM CGA** | DOS prompt | Color Graphics Adapter, 16-color palette |
+| 24 | **MS-DOS** | DOS prompt | MS-DOS 6.22, HIMEM, full command set |
+
+#### Professional Unix (1985-1998)
+
+| # | Era | Simulation | Description |
+|---|-----|-----------|-------------|
+| 25 | **Sun Solaris** | Unix shell | SunOS 5.6 on SPARCstation, CDE-era |
+| 26 | **SGI IRIX** | Unix shell | IRIX 6.5 on an Octane workstation |
+| 27 | **NeXT** | Unix shell | NeXTSTEP 3.3, grayscale aesthetic |
+
+#### BBS & Online (1985-1997)
+
+| # | Era | Simulation | Description |
+|---|-----|-----------|-------------|
+| 28 | **BBS Terminal** | Full BBS | Modem dial-up, ANSI art, message boards, door games |
+
+#### Modern (1995-2000)
+
+| # | Era | Simulation | Description |
+|---|-----|-----------|-------------|
+| 29 | **Early Linux** | Unix shell | Slackware 3.6, LILO boot, kernel 2.0.36, BogoMIPS |
+| 30 | **Windows 98** | DOS prompt | Microsoft Windows 98 command prompt |
 
 ### Interactive Simulators
 
-**IBM 029 Keypunch**: Type characters to punch Hollerith codes on 80-column cards. See the real punch patterns appear. Release cards to your deck, then submit to the card reader.
+Each simulator is a self-contained bash script that recreates the authentic experience of using the original hardware.
 
-**Enigma M3**: Configure rotors (I-V), ring settings, plugboard pairs. Type to encrypt with real-time rotor stepping. Letters never encrypt to themselves. Output in 5-letter groups.
+#### IBM 029 Keypunch (`era-punchcard.sh`)
 
-**Front Panel (Altair/PDP-8)**: Toggle switches to enter octal data. Examine and deposit memory. Load pre-built programs. Play "Kill the Bit" — the classic front-panel game.
+A real punch card machine. Type characters and watch Hollerith punch patterns appear on an 80-column, 12-row card in real time. The encoding is authentic — `A` punches rows 12+1, `Z` punches rows 0+9, just like the real IBM 029.
 
-**BASIC Interpreter**: A real BASIC shell supporting PRINT, LET, IF/THEN, GOTO, FOR/NEXT, INPUT, GOSUB/RETURN, and more. Line-numbered program storage with RUN, LIST, NEW, LOAD, SAVE. Configured per-era (C64 says `READY.`, Spectrum has keyword entry, Apple II is uppercase-only).
+- **Type** any character to punch it onto the card
+- **Ctrl-R** (REL) — Release current card to the deck, feed a new blank card
+- **Ctrl-D** (DUP) — Duplicate the previous card
+- **Ctrl-S** (SUBMIT) — Feed the entire deck through the card reader
+- **JCL support** — Cards starting with `//` are processed as Job Control Language
+- **Greenbar output** — Job results printed on alternating green/white paper
 
-**DOS Prompt**: Virtual filesystem with DIR, CD, TYPE, COPY, DEL, MKDIR, CLS, VER, MEM, TREE. Pre-populated AUTOEXEC.BAT and CONFIG.SYS. Drive letter support (C:\, A:\).
+```
+╔══════════════════════════════════════════════════════════════╗
+║ IBM 029 KEYPUNCH                              COLUMN: 06    ║
+╠══════════════════════════════════════════════════════════════╣
+║ CARD: HELLO _                                               ║
+║ 12: □□■□□ □□□□□ □□□□□ □□□□□ ...                            ║
+║ 11: □□□□□ □□□□□ □□□□□ □□□□□ ...                            ║
+║  0: □□□□□ ■□□□□ □□□□□ □□□□□ ...                            ║
+║  1: □□□□□ □□□□□ □□□□□ □□□□□ ...                            ║
+║  ...                                                         ║
+╚══════════════════════════════════════════════════════════════╝
+```
 
-**BBS Terminal**: Full dial-up BBS experience. Modem connect simulation, ANSI art welcome screen, message bases, file areas with download progress bars, a text adventure door game, and "NO CARRIER" disconnect.
+#### Enigma M3 Cipher Machine (`era-enigma.sh`)
 
-**IBM 3270**: Block-mode forms terminal. TSO login screen, ISPF primary option menu, utilities panel, dataset list, TSO command line. Tab between fields, Enter to submit.
+A cryptographically accurate simulation of the Wehrmacht Enigma M3. Configure the machine exactly as a real operator would — select three rotors from five (I-V), set ring positions, choose starting positions, and wire plugboard pairs. Then type plaintext to encrypt.
 
-**Classic Unix**: Login prompt with era-appropriate MOTD. Commands: ls, cat, cd, pwd, who, date, uname, ps, df. Variants for VT100 (BSD), Solaris, IRIX, NeXT, Amiga, early Linux.
+- **Real rotor wirings** — All five Enigma I/M3 rotor wiring tables, Reflector B
+- **Rotor stepping** — Correct turnover behavior including double-stepping
+- **No letter encrypts to itself** — The fundamental Enigma property, enforced by the reflector
+- **Reciprocal encryption** — Type ciphertext with the same settings to decrypt
+- **5-letter groups** — Output formatted in the standard military format
+- **Plugboard** — Up to 13 letter-pair swaps
 
-**Teletype ASR-33**: 10 characters per second output. Uppercase only. Carriage return delays. Paper tape display for saved programs.
+#### Front Panel — Altair 8800 / PDP-8 / IMSAI 8080 (`era-frontpanel.sh`)
+
+An ASCII-art front panel with blinking LEDs and toggle switches. Three machines available:
+
+- **Altair 8800** — 16-bit address, 8-bit data, the machine that launched the microcomputer revolution
+- **PDP-8** — 12-bit address, 12-bit data, DEC's iconic minicomputer
+- **IMSAI 8080** — The Altair's competitor, as seen in *WarGames*
+
+Toggle switches with number keys 0-7, then use commands to interact:
+
+| Key | Command | Description |
+|-----|---------|-------------|
+| E | Examine | Read memory at current address |
+| D | Deposit | Store switch value at current address |
+| N | Deposit Next | Advance address, then deposit |
+| R | Run | Execute from current address (LEDs animate) |
+| S | Stop | Halt execution |
+| L | Load Address | Set address register from switches |
+| P | Load Program | Choose a pre-built program |
+| K | Kill the Bit | Launch the classic front-panel game |
+
+#### BASIC Interpreter (`era-basic.sh`)
+
+A real BASIC interpreter implemented in bash, configured per-era to match 9 different home computers. This isn't a mockup — it parses, stores, and executes BASIC programs.
+
+**Supported statements:** `PRINT`, `LET`, `IF...THEN`, `GOTO`, `FOR...NEXT`, `INPUT`, `REM`, `END`, `GOSUB`, `RETURN`
+
+**Commands:** `RUN`, `LIST`, `NEW`, `CLR`, `LOAD`, `SAVE`, `QUIT`
+
+**Functions:** `INT()`, `RND()`, `ABS()`, `LEN()`, `LEFT$()`, `RIGHT$()`, `MID$()`, `CHR$()`, `ASC()`
+
+**Variables:** Numeric (`A`-`Z`, `A0`-`Z9`) and string (`A$`-`Z$`)
+
+Per-era differences:
+
+| Era | Prompt | Boot Banner | Special |
+|-----|--------|-------------|---------|
+| Apple II | `]` | `APPLE ][` / `*APPLE II BASIC*` | Uppercase only |
+| PET | `READY.` | `*** COMMODORE BASIC ***` | |
+| TRS-80 | `READY` / `>` | `RADIO SHACK LEVEL II BASIC` | Uppercase only |
+| C64 | `READY.` | `**** COMMODORE 64 BASIC V2 ****` | |
+| ZX Spectrum | `K>` | `(c) 1982 Sinclair Research Ltd` | Single-key keywords (P=PRINT) |
+| BBC Micro | `>` | `BBC Computer 32K` / `BASIC` | |
+| Amstrad CPC | `Ready` | `Locomotive BASIC 1.0` | |
+| MSX | `Ok` | `MSX BASIC version 1.0` | |
+| Atari 800 | `READY` | (minimal) | |
+
+Example session:
+```
+**** COMMODORE 64 BASIC V2 ****
+64K RAM SYSTEM  38911 BASIC BYTES FREE
+
+READY.
+10 FOR I=1 TO 5
+20 PRINT I*I
+30 NEXT I
+RUN
+1
+4
+9
+16
+25
+
+READY.
+```
+
+#### DOS Prompt (`era-dos.sh`)
+
+A virtual DOS environment with an in-memory filesystem. Three variants: IBM PC DOS 3.30 (for MDA/CGA eras), MS-DOS 6.22, and Windows 98.
+
+**Commands:** `DIR`, `CD`, `TYPE`, `COPY`, `DEL`, `REN`, `MKDIR`, `RMDIR`, `CLS`, `VER`, `DATE`, `TIME`, `MEM`, `TREE`, `HELP`, `ECHO`, `EXIT`
+
+Pre-populated filesystem:
+```
+C:\
+├── AUTOEXEC.BAT      (viewable with TYPE)
+├── CONFIG.SYS        (viewable with TYPE)
+├── COMMAND.COM
+├── DOS\
+│   ├── EDIT.COM, FORMAT.COM, FDISK.EXE
+│   ├── HIMEM.SYS, EMM386.EXE, DOSKEY.COM
+│   └── MEM.EXE, CHKDSK.EXE, XCOPY.EXE
+├── GAMES\
+│   ├── DOOM.EXE, WOLF3D.EXE, PRINCE.EXE
+├── WINDOWS\
+└── UTILS\
+```
+
+#### BBS Terminal (`era-bbs.sh`)
+
+The complete 1990s dial-up BBS experience:
+
+1. **Modem connection** — `ATDT 555-0199` → `RING...` → `CONNECT 14400/ARQ/V.32bis/LAPM`
+2. **ANSI art welcome screen** — Colorful ASCII art banner
+3. **Login** — Handle and password prompt
+4. **Main menu** — Navigate with single-key commands:
+   - **(M)** Message Bases — Read and post messages
+   - **(F)** File Areas — Browse files with download progress bars
+   - **(D)** Door Games — Play "Dragon's Lair" text adventure
+   - **(W)** Who's Online — See connected users
+   - **(S)** Your Stats — Call count, messages posted, files downloaded
+   - **(C)** Chat with SysOp
+   - **(G)** Goodbye — `NO CARRIER` disconnect
+5. **Time limit** — "Time Left: 45 min" countdown in status bar
+
+#### IBM 3270 Block-Mode Terminal (`era-3270.sh`)
+
+A TSO/ISPF mainframe experience circa 1990s:
+
+- **TSO Login** — `IKJ56700A ENTER USERID` prompt with RACF authentication fields
+- **ISPF Primary Option Menu** — Settings, View, Edit, Utilities, Batch, Command, Tutorial
+- **Utilities Panel** — Library, Dataset, Move/Copy, Dslist
+- **Dataset List** — Browse `USERID.*` datasets (JCL, COBOL.SOURCE, LOAD, etc.)
+- **TSO Command Shell** — Enter commands: `TIME`, `LISTCAT`, `STATUS`, `SEND`, `HELP`, `LOGOFF`
+- **Status line** — System name, clock, `COMMAND ===>` prompt at bottom
+
+#### Classic Unix Shell (`era-unix.sh`)
+
+A simulated Unix login with per-era personality. Virtual filesystem with `/home/user`, `/etc`, `/usr/bin`, `/var/log`, and pre-populated config files.
+
+**Commands:** `ls` (with `-l`, `-la`), `cat`, `cd`, `pwd`, `who`, `date`, `uname` (`-a`), `man`, `ps` (`-ef`), `df` (`-h`), `uptime`, `hostname`, `echo`, `clear`, `exit`
+
+7 variants, each with authentic boot sequence, MOTD, and prompt:
+
+| Variant | Host | System | Prompt |
+|---------|------|--------|--------|
+| VT100 | `pdp11` | BSD 4.2 | `% ` |
+| VT220 | `vax780` | VAX/VMS 4.7 | `$ ` |
+| Solaris | `sunbox` | SunOS 5.6 | `sunbox% ` |
+| IRIX | `octane` | IRIX64 6.5 | `octane% ` |
+| NeXT | `next` | NeXTSTEP 3.3 | `next:~> ` |
+| Amiga | `amiga` | AmigaOS 3.1 | `1.RAM:> ` |
+| Linux | `linux` | Linux 2.0.36 | `user@linux:~$ ` |
+
+The Linux variant boots through LILO with full kernel messages. The Solaris variant shows the SunOS copyright. The Amiga variant supports `DIR` as an alias for `ls`.
+
+#### Teletype ASR-33 (`era-teletype.sh`)
+
+A Model 33 teletype at 110 baud — every character printed with a ~100ms delay, simulating the mechanical print head. All output is uppercase. Includes BASIC mode (launches `era-basic.sh` in teletype mode) and a standalone command mode with paper tape punching.
+
+### Era Settings
+
+| Setting | Options | Default | Description |
+|---------|---------|---------|-------------|
+| `MATRIX_ERA` | era ID or empty | `""` | Current terminal era (empty = Matrix theme) |
+| `MATRIX_ERA_INTERACTIVE` | true, false | `false` | Launch interactive simulation on new terminal |
+
+Set via the TUI or directly in `~/.config/ghostty/matrix.conf`.
 
 ## File Structure
 
