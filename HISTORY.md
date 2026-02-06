@@ -81,9 +81,11 @@ This project is a time machine. Each era takes you back to a different moment in
 
 When *The Matrix* premiered on March 31, 1999, it crystallized something that hacker culture had known for decades: the terminal is where reality is negotiated.
 
-The film's production design was meticulous. The "digital rain" — those cascading half-width katakana characters — was created by scanning sushi recipes from Simon Whiteley's wife's Japanese cookbooks, then digitally manipulating the characters. The green-on-black color scheme wasn't arbitrary. It was a direct reference to the green phosphor CRT monitors that had defined computing for a generation.
+The film's production design was meticulous. The "digital rain" — those cascading half-width katakana characters — was created by Simon Whiteley, who scanned characters from his wife's Japanese cookbooks, combined them with mirrored Latin numerals, and hand-drew each element before digitizing them. Whiteley has kept the specific cookbook source secret: "I've been kind of not wanting to tell anyone what the recipe book is, partly because that's the last bit of magic." The green-on-black color scheme wasn't arbitrary. It was a direct reference to the green phosphor CRT monitors that had defined computing for a generation.
 
-In the film, every interaction with the Matrix's underlying reality happens through a terminal interface. Trinity's opening hack uses real tools — `nmap` for port scanning, `sshnuke` for exploitation. When Neo finally sees the Matrix as code, the green rain is the visual representation of seeing through the interface to the machine beneath.
+In the film, every interaction with the Matrix's underlying reality happens through a terminal interface. Trinity's opening hack uses real tools — `nmap` for port scanning, `sshnuke` for exploitation. In *The Matrix Reloaded*, Trinity exploits the SSH v1 CRC32 vulnerability — a real buffer overflow. When Neo finally sees the Matrix as code, the green rain is the visual representation of seeing through the interface to the machine beneath.
+
+The Wachowskis drew explicitly on philosophical tradition. Neo hides contraband inside a hollowed-out copy of Baudrillard's *Simulacra and Simulation* — a text arguing that in modern culture, simulations become more real than reality itself. The Matrix literalizes this: the simulated world is more vivid and comfortable than the devastated real world. (Baudrillard himself disavowed the film, arguing it was exactly the kind of simulation he was warning about.)
 
 But the connection between *The Matrix* and terminal culture runs deeper than aesthetic. The film's central question — "What is real?" — is the same question that every programmer confronts. What is a file? What is a process? What is memory? These things don't exist in any physical sense. They are abstractions, consensual hallucinations maintained by the machine. The terminal is where you negotiate with those abstractions directly.
 
@@ -211,6 +213,8 @@ At Bletchley Park, Alan Turing refined the approach, building the British "Bombe
 
 **Cultural significance:**
 
+By 1943, Bletchley Park was decoding over 84,000 Enigma messages per month — roughly two per minute. The codebreakers even developed a technique called "gardening": the RAF would deliberately lay mines in specific grid positions, generating predictable German messages that could be used as "cribs" (known plaintext) to break the day's settings.
+
 Ultra intelligence — derived from broken Enigma messages — is estimated to have shortened the war by two years and saved millions of lives. The breaking of Enigma was the first great triumph of computational thinking over brute complexity, and it set the intellectual foundation for the entire field of computer science.
 
 **Our simulator:** Implements the real M3 rotor wirings (I through V), reflectors B and C, a 13-pair plugboard, and proper double-stepping. You can encrypt a message, then type the ciphertext back to verify decryption — exactly as a German operator would have done in 1944.
@@ -226,11 +230,11 @@ Ultra intelligence — derived from broken Enigma messages — is estimated to h
 
 Colossus wasn't built to break Enigma — it was built to break something harder. The Lorenz SZ42 cipher machine, codenamed "Tunny" by the British, was used for high-level strategic communications between Hitler and his generals. It was far more complex than Enigma, using twelve rotors instead of three.
 
-Tommy Flowers, a telephone engineer at the Post Office Research Station at Dollis Hill, proposed building a machine using thermionic valves (vacuum tubes) — 1,500 of them for the Mk 1, 2,400 for the Mk 2. His superiors thought he was mad. Valves were fragile, unreliable, and expensive. No one had built anything with so many valves. But Flowers knew that valves failed primarily when being switched on and off, so he kept Colossus running continuously. It worked.
+Tommy Flowers, a telephone engineer at the Post Office Research Station at Dollis Hill, proposed building a machine using thermionic valves (vacuum tubes) — 1,500 of them for the Mk 1, 2,400 for the Mk 2. His superiors thought he was mad. Valves were fragile, unreliable, and expensive. No one had built anything with so many valves. Flowers used his own personal savings to help fund the construction. But he knew that valves failed primarily when being switched on and off, so he kept Colossus running continuously. It worked.
 
 Colossus read encrypted messages from paper tape at 5,000 characters per second — the tape physically flew through the reader at nearly 30 miles per hour. The machine performed Boolean logic operations on the data, counting statistical patterns that revealed the Lorenz machine's settings.
 
-Ten Colossi were built by the end of the war. After VJ Day, eight were dismantled on Winston Churchill's orders, and the remaining two were classified so deeply that their existence wasn't publicly acknowledged until the 1970s. Tommy Flowers was forbidden from telling anyone what he had built. He couldn't even use his wartime experience to get a bank loan.
+Ten Colossi were built by the end of the war. After VJ Day, Winston Churchill personally ordered the destruction of the machines, specifying they be broken into "pieces no bigger than a man's hand." Flowers burned all the drawings and plans in a boiler fire. The remaining two machines were classified so deeply that their existence wasn't publicly acknowledged until the 1970s. The government granted Flowers only £1,000 — which didn't cover his personal investment — and he divided most of it among his team. He was forbidden from telling anyone what he had built. He couldn't even use his wartime experience to get a bank loan.
 
 Colossus was the world's first programmable electronic digital computer, though this was unknown for decades because of the official secrecy, leading many to credit ENIAC (1945) with that distinction.
 
@@ -271,6 +275,8 @@ The 029 had a "program drum" that could be loaded with a punched card to define 
 **The 80-column legacy:**
 
 Why do terminal windows default to 80 columns? Because of the punch card. The 80-column standard propagated from cards to video terminals (the IBM 3270 had an 80-column display), to the VT100, to every terminal emulator since. Every time you see 80-character line limits in a style guide, you're looking at a ghost of the punch card.
+
+During the 1960s Berkeley Free Speech Movement, students wore buttons reading "Do Not Fold, Spindle, or Mutilate — I Am a Student," turning the punch card's standard printed warning into a symbol of resistance against dehumanizing bureaucracy. Hollerith's Tabulating Machine Company (founded 1896) eventually became IBM — making the punch card the direct ancestor of the world's largest technology company.
 
 **Our simulator:** Implements real Hollerith encoding with a visual 80-column card showing all 12 rows. You type characters and see the actual punch pattern appear. Cards can be released to a deck and submitted to a simulated card reader. JCL (Job Control Language) cards starting with `//` trigger job processing with authentic ABEND error messages.
 
@@ -320,7 +326,7 @@ If the Teletype was the voice of interactive computing, the line printer was the
 
 The IBM 1403 used a continuously rotating chain (or "print train") of 240 character slugs that whipped past the paper at high speed. As each character on the chain passed a print position, a tiny hammer would fire at precisely the right moment, pressing the paper and ink ribbon against the moving chain to transfer the character. All 132 print positions had independent hammers that could fire simultaneously, allowing an entire line to be printed in a single revolution of the chain.
 
-The sound was extraordinary — a sustained, high-pitched roar like a swarm of mechanical bees. When printing, the 1403 produced a distinctive oscillating hum that varied with the content being printed. Experienced operators could identify programs by the sound of their output. Clever programmers discovered that by printing specific patterns, they could make the printer play recognizable music — one of the earliest forms of computer art.
+The sound was extraordinary — a sustained, high-pitched roar like a swarm of mechanical bees. When printing, the 1403 produced a distinctive oscillating hum that varied with the content being printed. Experienced operators could identify programs by the sound of their output. Clever programmers discovered that by printing specific patterns, they could make the printer play recognizable music. Around 1970, computer scientist Ron Mak coded songs on punch cards that produced recognizable renditions of "The Blue Danube" and other melodies — some of the earliest computer art, now preserved at the Computer History Museum.
 
 **Greenbar paper:**
 
@@ -380,9 +386,9 @@ The System/360 was not a computer. It was an *architecture* — a unified family
 
 **The gamble:**
 
-IBM bet the company on the System/360. The development cost was $5 billion (equivalent to roughly $50 billion today) — more than the Manhattan Project. At the time, IBM's annual revenue was about $3 billion. CEO Thomas J. Watson Jr. later called it "the most important product announcement that IBM ever made" and "perhaps the most important product announcement in the history of the computer industry."
+IBM bet the company on the System/360. The development cost was $5 billion (equivalent to roughly $50 billion today) — more than the Manhattan Project. At the time, IBM's annual revenue was about $3 billion. The announcement event on April 7, 1964 was held simultaneously in 165 U.S. cities with over 100,000 attendees. CEO Thomas J. Watson Jr. later called it "the most important product announcement that IBM ever made."
 
-The name "360" referred to 360 degrees — all points of the compass. IBM intended the system to address every possible computing need.
+The name "360" referred to 360 degrees — all points of the compass. IBM intended the system to address every possible computing need. Perhaps its most lasting technical decision: Fred Brooks chose an 8-bit byte over 6-bit, enabling lowercase letters. He later called it "the most important single decision I ever made." That 8-bit byte became the universal standard for all computing.
 
 **IPL and the operator console:**
 
@@ -445,7 +451,7 @@ The 1970s saw the transition from teletypes and front panels to the video displa
 **Price**: $1,895 (about $8,800 today)
 **Type**: ANSI-standard video display terminal
 
-The VT100 is the most influential terminal ever made. Not the most powerful, not the most advanced, not the most popular at its peak — but the most *influential*. The VT100 defined the standard for terminal behavior that we still use today. Every terminal emulator you have ever used is, at its core, emulating a VT100.
+The VT100 is the most influential terminal ever made. Not the most powerful, not the most advanced, not the most popular at its peak — but the most *influential*. Over six million VT-series terminals were sold. The VT100 defined the standard for terminal behavior that we still use today. Every terminal emulator you have ever used is, at its core, emulating a VT100.
 
 **Why it mattered:**
 
@@ -476,7 +482,7 @@ The VT100's keyboard layout — with its distinctive arrangement of function key
 **Display**: 14-inch amber phosphor CRT (green also available), 80×24 or 132×24
 **Type**: ANSI video display terminal
 
-The VT220 was the VT100 refined. Where the VT100 was a revolution, the VT220 was an evolution — faster, more capable, and available with the amber phosphor display that many operators preferred for long sessions.
+The VT220 was the VT100 refined. Where the VT100 was a revolution, the VT220 was an evolution — faster, more capable, and available with the amber phosphor display that many operators preferred for long sessions. In 1986, DEC shipped 165,000 VT220 units, commanding a 42% market share — double the nearest competitor. Over one million VT220s were shipped during its remarkable 15-year production run (1983-1998).
 
 **Amber phosphor:**
 
@@ -522,7 +528,7 @@ The most famous Altair front-panel program was "Kill the Bit" — a game where a
 
 **Birth of Microsoft:**
 
-When Harvard student Bill Gates and his friend Paul Allen saw the Altair cover, they called MITS and claimed to have a BASIC interpreter ready. They didn't — but they wrote one in eight weeks, and Micro-Soft (as it was initially hyphenated) was born. The Altair BASIC they delivered was the first product from what would become the world's largest software company.
+When Harvard student Bill Gates and his friend Paul Allen saw the Altair cover, they called MITS and claimed to have a BASIC interpreter ready. They had neither an interpreter nor an Altair. Allen adapted an Intel 8008 emulator to run on Harvard's PDP-10, and they wrote Altair BASIC without ever touching the hardware. On the flight to Albuquerque for the demonstration, Allen realized they had forgotten to write a bootloader — he wrote one in 8080 machine language before the plane landed. The interpreter worked on the first try, and Micro-Soft (as it was initially hyphenated) was born.
 
 **Our simulator:** Renders the full Altair front panel with address and data LEDs in octal grouping, toggle switches controlled by the keyboard, and all standard operations (EXAMINE, DEPOSIT, DEPOSIT NEXT, RUN, STOP, LOAD ADDRESS). Pre-loaded programs include a counter, LED chaser, and Kill the Bit. The PDP-8 and IMSAI 8080 variants are also available.
 
@@ -602,7 +608,7 @@ The PET used PETSCII (PET Standard Code of Information Interchange), Commodore's
 **Price**: $599 (about $3,000 today)
 **BASIC**: Level II BASIC (Microsoft-authored)
 
-The "Trash-80," as it was affectionately nicknamed, was the most successful of the 1977 trinity. Radio Shack's 3,000+ retail stores gave the TRS-80 a distribution channel that Apple and Commodore couldn't match. Within its first month, it outsold Tandy's production estimates for the entire year.
+The "Trash-80," as it was affectionately nicknamed, was the most successful of the 1977 trinity. Radio Shack spent less than $150,000 developing the TRS-80 — one of the most efficient product development investments in computing history. Their 3,000+ retail stores gave the TRS-80 a distribution channel that Apple and Commodore couldn't match. Within its first month, it outsold Tandy's production estimates for the entire year. By 1978, Radio Shack was selling roughly half of all personal computers in the United States.
 
 **The white phosphor:**
 
@@ -648,7 +654,7 @@ That `38911 BASIC BYTES FREE` number (out of 65536 total) accounted for the BASI
 
 **The SID chip:**
 
-The C64's sound chip (SID 6581, designed by Bob Yannes) was a genuine three-voice synthesizer with ADSR envelopes, ring modulation, and a programmable filter. It was so far ahead of the competition that it spawned an entire music scene. Composers like Rob Hubbard, Martin Galway, and Jeroen Tel created works of art using three voices and a filter, and the SID music scene (the "demoscene") continues to this day. The SID chip is arguably the single most culturally important component in computing history.
+The C64's sound chip (SID 6581, designed by Bob Yannes, who was inspired by progressive rock bands like Emerson, Lake & Palmer) was a genuine three-voice synthesizer with ADSR envelopes, ring modulation, and a programmable filter. Yannes essentially designed a single-chip synthesizer rather than a simple sound effects generator. It was so far ahead of the competition that it spawned an entire music scene. Composers like Rob Hubbard, Martin Galway, and Jeroen Tel created works of art using three voices and a filter, and the SID music scene (the "demoscene") continues to this day. The High Voltage SID Collection currently contains over 55,000 SID compositions — a testament to the chip's musical expressiveness. The SID chip is arguably the single most culturally important component in computing history.
 
 **The Pepto palette:**
 
@@ -705,7 +711,7 @@ The `>` prompt was distinctive — clean, minimal, professional. It reflected th
 
 **Acorn's legacy:**
 
-The BBC Micro led Acorn to develop the ARM processor (originally "Acorn RISC Machine") in 1985. Today, ARM processors power essentially every smartphone on Earth, most tablets, and an increasing number of laptops and servers. The BBC Micro's descendant architecture runs more devices than any other processor design in history.
+The BBC Micro led Acorn to develop the ARM processor (originally "Acorn RISC Machine") in 1985. Sophie Wilson designed the instruction set. The development cost was approximately £5 million — a tiny investment that spawned a processor architecture worth hundreds of billions of dollars. The ARM joint venture with Apple and VLSI in 1990 created what eventually became Arm Holdings. Today, ARM processors power essentially every smartphone on Earth, most tablets, and an increasing number of laptops and servers. The BBC Micro's descendant architecture runs more devices than any other processor design in history.
 
 **Our simulator:** Boots with `BBC Computer 32K` / `Acorn DFS` / `BASIC` / `>` — the exact startup sequence. BBC BASIC is simulated through the universal BASIC interpreter.
 
@@ -806,7 +812,7 @@ While the Amiga had the Workbench GUI, power users lived in the CLI (Command Lin
 
 **Cultural impact:**
 
-The Amiga became the foundation of the desktop video revolution, the demoscene, and early multimedia. Babylon 5's visual effects were created on Amigas. Andy Warhol used an Amiga to create digital art at the machine's 1985 launch event (painting a portrait of Debbie Harry). NewTek's Video Toaster turned the Amiga into a broadcast-quality video production system.
+The Amiga became the foundation of the desktop video revolution, the demoscene, and early multimedia. Foundation Imaging used 24 Commodore Amiga 2000s with Video Toasters to create the visual effects for *Babylon 5*, winning the 1993 Emmy Award for Outstanding Individual Achievement in Special Visual Effects — the first major TV series to use entirely computer-generated space effects. Andy Warhol used an Amiga to create digital art at the machine's 1985 launch event at Lincoln Center (painting a portrait of Debbie Harry). NewTek's Video Toaster turned the Amiga into a broadcast-quality video production system that rivaled systems costing ten times as much.
 
 **Our simulator:** Boots into AmigaDOS with `AmigaDOS V3.1` and the Workbench copyright. The classic blue-and-orange Workbench color scheme is applied. The Unix shell simulator provides the CLI experience.
 
@@ -876,6 +882,8 @@ This palette (with minor variations) was carried forward through EGA, VGA, and i
 **Developer**: Microsoft (originally Seattle Computer Products' 86-DOS)
 **Final version**: 6.22 (June 1994)
 **Type**: Command-line operating system
+
+Tim Paterson wrote QDOS (Quick and Dirty Operating System) starting April 1980 because no CP/M-86 was available for the 8086 processor. Microsoft bought a non-exclusive license for $25,000 in December 1980, then full rights for $50,000 in July 1981. Microsoft's deal with IBM allowed them to license MS-DOS to other manufacturers — the single most consequential business decision in personal computing history. IBM thought the money was in hardware; Microsoft knew it was in software.
 
 MS-DOS was the operating system that Microsoft built its empire on. For over a decade, it was the default operating system on the majority of the world's personal computers. It was simple (no multitasking, no memory protection, 640 KB conventional memory limit), it was fragile (one misbehaving program could crash the entire system), and it was enormously successful.
 
@@ -957,6 +965,8 @@ IRIX was SGI's Unix variant, based on UNIX System V with BSD extensions. It was 
 
 SGI machines didn't just contribute to Hollywood — they appeared in it. In *Jurassic Park* (1993), the girl who hacks the door locks exclaims "This is a Unix system! I know this!" while using SGI's File System Navigator (fsn), a 3D filesystem browser that actually existed (and was later recreated as open source). The scene is one of the most famous computer interfaces in cinema history.
 
+SGI's decline came as commodity GPUs (particularly from NVIDIA, whose founders came from SGI) made specialized graphics workstations obsolete. The democratization of capabilities that once required a $100,000 SGI workstation — now available in every smartphone — is one of the great cascading effects in computing history.
+
 **Our simulator:** Boots with `IRIX Release 6.5 IP30` (the Octane's hardware platform) and the SGI copyright. The Unix shell provides an era-appropriate environment.
 
 ---
@@ -979,7 +989,7 @@ The NeXT Computer was a perfect one-foot magnesium cube, painted matte black. It
 
 **The World Wide Web:**
 
-Tim Berners-Lee created the World Wide Web on a NeXT Computer at CERN in 1989-1991. The first web server, the first web browser (WorldWideWeb.app), and the first web page all ran on NeXTSTEP. The machine's advanced development environment made it possible for Berners-Lee to create the web as a side project in a matter of months. The NeXT cube that served the first website is now displayed at CERN with a note attached: "This machine is a server. DO NOT POWER IT DOWN!!"
+Tim Berners-Lee created the World Wide Web on a NeXT Computer at CERN in 1989-1991. The first web server, the first web browser (WorldWideWeb.app), and the first web page all ran on NeXTSTEP. Berners-Lee built it in just two months, crediting NeXTSTEP's rapid development environment. Crucially, the first web browser was also an *editor* — you could modify web pages directly in the browser, making the web inherently read-write from birth. This capability was lost when browsers were ported to less capable platforms. The NeXT cube that served the first website is now displayed at CERN with a note attached: "This machine is a server. DO NOT POWER IT DOWN!!"
 
 **Apple's return:**
 
@@ -1002,6 +1012,8 @@ Apple acquired NeXT in 1997 for $429 million, bringing Steve Jobs back to Apple 
 Before the World Wide Web, before social media, before forums — there were BBSes. Bulletin Board Systems were the internet before the internet: local, community-run, dial-up services where people posted messages, shared files, played games, and formed communities. The BBS era was the most democratic period in computing history. Anyone with a computer, a modem, and a phone line could run one.
 
 **The ritual:**
+
+The first BBS — CBBS — was created because of a blizzard. The Great Blizzard of 1978 dumped record snow on Chicago, stranding members of the Chicago Area Computer Hobbyists' Exchange. Christensen and Suess, stuck indoors, created CBBS so hobbyists could exchange information by phone line. The idea spread like wildfire.
 
 Connecting to a BBS was a ritual. You launched your terminal program (TELIX, Procomm, QMODEM), typed `ATDT` followed by the phone number, and waited. The modem dialed — you could hear the tones if your modem had a speaker. Then came the handshake: a burst of electronic screeching as the two modems negotiated their connection speed. `CONNECT 14400` meant success. The screen would fill with the BBS's welcome screen — usually elaborate ANSI art with the board's name, sysop credits, and a login prompt.
 
@@ -1082,6 +1094,8 @@ Linux in the late 1990s was at an inflection point. It had proven itself reliabl
 **Significance**: The last mainstream OS before the Matrix's 1999
 
 Windows 98 was the world that *The Matrix* was rebelling against. While the film showed green terminals and raw code, most computer users in 1999 were staring at a teal desktop with a Start button. Windows 98 was comfortable, familiar, and ubiquitous — and it hid the machine completely.
+
+At the Windows 98 launch demonstration, when assistant Chris Capossela plugged in a USB scanner to demonstrate Plug and Play, the system crashed with a Blue Screen of Death live on stage. Bill Gates quipped, "That must be why we're not shipping Windows 98 yet" — though the event *was* the actual launch.
 
 **The DOS underneath:**
 
