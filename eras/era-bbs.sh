@@ -8,7 +8,7 @@ era_setup_traps
 declare -a MSG_POSTS=()
 PLAYER_HANDLE=""
 TIME_START=$(date +%s)
-DRAGON_GOLD=0
+
 
 # --- Colors ---
 c_cyan=$'\033[1;36m'

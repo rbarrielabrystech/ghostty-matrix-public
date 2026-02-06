@@ -404,7 +404,13 @@ select_machine() {
 main() {
     era_hide_cursor
     stty -echo 2>/dev/null
-    select_machine
+    # Honor $1 from era-boot.sh dispatch (pdp8, altair, imsai)
+    case "${1:-}" in
+        pdp8)   MACHINE="pdp8";   MACHINE_LABEL="PDP-8";      ADDR_BITS=12; DATA_BITS=12 ;;
+        altair) MACHINE="altair"; MACHINE_LABEL="ALTAIR 8800"; ADDR_BITS=16; DATA_BITS=8 ;;
+        imsai)  MACHINE="imsai";  MACHINE_LABEL="IMSAI 8080";  ADDR_BITS=16; DATA_BITS=8 ;;
+        *)      select_machine ;;
+    esac
     init_memory
     WAIT_LED=1
     STATUS_MSG="Ready. Toggle switches [0-7], then use commands."
@@ -454,4 +460,4 @@ main() {
     done
 }
 
-main
+main "$@"

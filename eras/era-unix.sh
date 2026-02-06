@@ -7,7 +7,7 @@ era_setup_traps
 ERA="${1:-${MATRIX_ERA:-vt100}}"
 
 # --- Per-Era Configuration ---
-declare -A ERA_HOST ERA_MOTD ERA_UNAME ERA_PROMPT ERA_BOOT
+declare -A ERA_HOST ERA_MOTD ERA_UNAME ERA_PROMPT
 ERA_HOST[vt100]="pdp11";   ERA_HOST[vt220]="vax780";  ERA_HOST[solaris]="sunbox"
 ERA_HOST[irix]="octane";   ERA_HOST[next]="next";      ERA_HOST[amiga]="amiga"
 ERA_HOST[linux]="linux"
