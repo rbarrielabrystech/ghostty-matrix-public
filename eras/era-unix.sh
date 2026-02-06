@@ -85,15 +85,22 @@ resolve_path() {
     [[ -z "$p" ]] && { echo "$CWD"; return; }
     [[ "$p" != /* ]] && p="${CWD%/}/$p"
     # Normalise . and ..
-    local -a parts=() IFS=/; read -ra segs <<< "$p"
+    local -a parts=() segs=()
+    local oldIFS="$IFS"
+    IFS=/; read -ra segs <<< "$p"
+    IFS="$oldIFS"
     local s; for s in "${segs[@]}"; do
         case "$s" in
             ""|.) ;;
-            ..) (( ${#parts[@]} > 0 )) && unset 'parts[-1]' ;;
+            ..) (( ${#parts[@]} > 0 )) && unset 'parts[${#parts[@]}-1]' ;;
             *)  parts+=("$s") ;;
         esac
     done
-    local out="/"; (( ${#parts[@]} )) && out="/${parts[*]}"; out="${out// //}"
+    local out="/"
+    if (( ${#parts[@]} )); then
+        out=""
+        local part; for part in "${parts[@]}"; do out="${out}/${part}"; done
+    fi
     echo "$out"
 }
 

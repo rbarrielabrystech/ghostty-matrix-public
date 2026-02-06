@@ -273,8 +273,7 @@ boot_message() {
             echo "(C)Copyright Microsoft Corp 1981-1994."; echo "" ;;
         win98)
             echo ""; echo "Microsoft(R) Windows 98"
-            echo "   (C)Copyright Microsoft Corp 1981-1999."; echo ""
-            CWD="C:\\WINDOWS" ;;
+            echo "   (C)Copyright Microsoft Corp 1981-1999."; echo "" ;;
         *)
             echo ""; echo "MS-DOS Version 5.0"
             echo "(C)Copyright Microsoft Corp 1981-1991."; echo "" ;;
