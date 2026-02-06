@@ -15,8 +15,9 @@ High-fidelity Matrix (1999) terminal setup for [Ghostty](https://ghostty.org/).
 - **Full 1999 CRT mode**: barrel distortion, scanlines, shadow mask, vignette — like sitting in front of a CRT monitor in 1999
 - **CRT shutdown animation**: authentic power-down effect (brightness spike → vertical collapse → phosphor afterglow)
 - **Enhanced CRT effects**: toggleable static noise, horizontal jitter, interlacing, and halation
-- **5 shader effects**: CRT Full, CRT Scanlines, Phosphor Bloom, Matrix Glow, CRT Shutdown
-- **Interactive configuration TUI** (`matrix-config`): presets, shader picker, CRT effects, shutdown config, 25+ settings
+- **6 shader effects**: CRT Full, Retro CRT (switchable phosphor), CRT Scanlines, Phosphor Bloom, Matrix Glow, CRT Shutdown
+- **30 Terminal Eras**: Time-travel from WWII Enigma machines to Windows 98 with authentic palettes, boot messages, and interactive simulators
+- **Interactive configuration TUI** (`matrix-config`): presets, terminal eras, shader picker, CRT effects, shutdown config, 25+ settings
 - **5 one-click presets**: Full 1999 CRT, CRT Lite, Phosphor Bloom, Subtle Glow, Clean Terminal
 - **Phosphor-green color scheme** with accurate `#0d0208` background
 - **Fully configurable**: animation frequency, duration, sequences, colors, quotes, and more
@@ -111,6 +112,8 @@ nano ~/.config/ghostty/config
 | `MATRIX_CRT_JITTER` | true, false | false | Horizontal jitter (crt-full only) |
 | `MATRIX_CRT_INTERLACE` | true, false | false | Interlacing (crt-full only) |
 | `MATRIX_CRT_HALATION` | true, false | false | Enhanced halation (crt-full only) |
+| `MATRIX_ERA` | era ID or empty | "" | Current terminal era (empty = Matrix) |
+| `MATRIX_ERA_INTERACTIVE` | true, false | false | Launch interactive simulation on new terminal |
 
 See `matrix.conf` for all available options.
 
@@ -134,6 +137,7 @@ matrix-config       # Interactive configuration TUI
 matrix              # Run full startup sequence
 matrix-demo         # Reset lock and re-trigger animation
 matrix-off          # CRT shutdown animation + exit
+matrix-era          # Launch current era boot sequence
 matrix-rain         # Endless katakana rain
 matrix-conway       # Conway's Game of Life
 matrix-mandelbrot   # Mandelbrot fractal zoom
@@ -147,6 +151,7 @@ Located in `shaders/`. Switch between them via `matrix-config` or edit `~/.confi
 | Shader | Description | Effect | CPU Usage |
 |--------|-------------|--------|-----------|
 | `crt-full.glsl` | Full 1999 CRT | Barrel distortion, scanlines, shadow mask, vignette, optional noise/jitter/interlace/halation | Medium |
+| `retro-crt.glsl` | Retro CRT (Eras) | Switchable phosphor (green/amber/white/color), softer defaults | Medium |
 | `crt.glsl` | CRT Scanlines | Scanlines only, no curvature | Medium |
 | `bloom.glsl` | Phosphor Bloom (recommended) | Soft glow around bright text | Low |
 | `matrix-glow.glsl` | Matrix Glow | Subtle green glow, minimal | Low |
@@ -191,6 +196,85 @@ When using the `crt-full.glsl` shader, four additional effects can be toggled vi
 
 The **Full 1999 CRT** preset enables noise + interlacing automatically. Changes take effect in real-time via Ghostty's shader hot-reload.
 
+## Terminal Eras - Time Machine
+
+Transform your terminal into any classic computer from the 1940s to 2000. Access via `matrix-config` > `e) Terminal Eras...`.
+
+Each era applies:
+- **Authentic color palette** (16 ANSI colors + background/foreground)
+- **Period-correct CRT shader** (green phosphor, amber phosphor, white, or color)
+- **Boot message** (the exact text you'd see powering on the real machine)
+- **Interactive simulation** (optional - a working punch card, BASIC interpreter, etc.)
+
+### All 30 Eras
+
+| Era | Period | Interactive | Description |
+|-----|--------|-------------|-------------|
+| **Enigma Machine** | 1940s | Rotor encryption simulator | Real M3 rotor wirings, plugboard, lampboard |
+| **Colossus** | 1940s | Boot only | Bletchley Park codebreaking computer |
+| **IBM Punch Card** | 1950s | Keypunch simulator | Type characters, see Hollerith punches, submit card deck |
+| **Teletype ASR-33** | 1960s | 10 cps teletype | Slow printing, uppercase only, paper tape |
+| **Line Printer** | 1960s | Boot only | IBM 1403 greenbar output |
+| **IBM 3270** | 1970s | Block-mode terminal | TSO login, ISPF panels, forms-based input |
+| **IBM System/360** | 1960s | Boot only | Mainframe IPL sequence |
+| **DEC PDP-8** | 1960s | Front panel | LED display, toggle switches, octal entry |
+| **DEC VT100** | 1978 | Unix shell | Green phosphor, BSD 4.2 |
+| **DEC VT220** | 1983 | Unix shell | Amber phosphor, VMS-style |
+| **Altair 8800** | 1975 | Front panel | Toggle in programs, Kill the Bit game |
+| **Apple II** | 1977 | BASIC interpreter | Applesoft BASIC, green phosphor |
+| **Commodore PET** | 1977 | BASIC interpreter | Commodore BASIC, green CRT |
+| **TRS-80** | 1977 | BASIC interpreter | Level II BASIC, white phosphor |
+| **Commodore 64** | 1982 | BASIC interpreter | BASIC V2, blue-on-blue Pepto palette |
+| **ZX Spectrum** | 1982 | BASIC interpreter | Keyword entry mode (P=PRINT) |
+| **BBC Micro** | 1981 | BASIC interpreter | BBC BASIC |
+| **Amstrad CPC** | 1984 | BASIC interpreter | Locomotive BASIC, yellow-on-blue |
+| **MSX** | 1983 | BASIC interpreter | MSX-BASIC, white-on-blue |
+| **Atari 800** | 1979 | BASIC interpreter | Atari BASIC |
+| **Commodore Amiga** | 1985 | Unix shell | AmigaDOS Workbench |
+| **IBM MDA** | 1981 | DOS prompt | Green phosphor, DOS 3.30 |
+| **IBM CGA** | 1981 | DOS prompt | Color graphics adapter |
+| **MS-DOS** | 1991 | DOS prompt | DOS 6.22, DIR/CD/TYPE/MEM |
+| **Sun Solaris** | 1997 | Unix shell | SunOS 5.6, sparc workstation |
+| **SGI IRIX** | 1998 | Unix shell | Silicon Graphics |
+| **NeXT** | 1995 | Unix shell | NeXTSTEP 3.3, grayscale |
+| **BBS Terminal** | 1993 | Full BBS | Modem connect, ANSI art, message boards, door games |
+| **Early Linux** | 1998 | Unix shell | Slackware 3.6, LILO boot, kernel 2.0 |
+| **Windows 98** | 1998 | DOS prompt | MS-DOS under Windows |
+
+### Using Terminal Eras
+
+```bash
+matrix-config    # Open config TUI
+# Press 'e' for Terminal Eras
+# Select a category (1-9)
+# Select an era
+# Press 'i' to toggle interactive mode
+```
+
+When an era is active, new terminals show the boot message. With interactive mode enabled (`MATRIX_ERA_INTERACTIVE=true`), the era's simulation launches automatically.
+
+To return to the Matrix theme: press `m` in the Terminal Eras menu.
+
+### Interactive Simulators
+
+**IBM 029 Keypunch**: Type characters to punch Hollerith codes on 80-column cards. See the real punch patterns appear. Release cards to your deck, then submit to the card reader.
+
+**Enigma M3**: Configure rotors (I-V), ring settings, plugboard pairs. Type to encrypt with real-time rotor stepping. Letters never encrypt to themselves. Output in 5-letter groups.
+
+**Front Panel (Altair/PDP-8)**: Toggle switches to enter octal data. Examine and deposit memory. Load pre-built programs. Play "Kill the Bit" — the classic front-panel game.
+
+**BASIC Interpreter**: A real BASIC shell supporting PRINT, LET, IF/THEN, GOTO, FOR/NEXT, INPUT, GOSUB/RETURN, and more. Line-numbered program storage with RUN, LIST, NEW, LOAD, SAVE. Configured per-era (C64 says `READY.`, Spectrum has keyword entry, Apple II is uppercase-only).
+
+**DOS Prompt**: Virtual filesystem with DIR, CD, TYPE, COPY, DEL, MKDIR, CLS, VER, MEM, TREE. Pre-populated AUTOEXEC.BAT and CONFIG.SYS. Drive letter support (C:\, A:\).
+
+**BBS Terminal**: Full dial-up BBS experience. Modem connect simulation, ANSI art welcome screen, message bases, file areas with download progress bars, a text adventure door game, and "NO CARRIER" disconnect.
+
+**IBM 3270**: Block-mode forms terminal. TSO login screen, ISPF primary option menu, utilities panel, dataset list, TSO command line. Tab between fields, Enter to submit.
+
+**Classic Unix**: Login prompt with era-appropriate MOTD. Commands: ls, cat, cd, pwd, who, date, uname, ps, df. Variants for VT100 (BSD), Solaris, IRIX, NeXT, Amiga, early Linux.
+
+**Teletype ASR-33**: 10 characters per second output. Uppercase only. Carriage return delays. Paper tape display for saved programs.
+
 ## File Structure
 
 ```
@@ -200,12 +284,25 @@ The **Full 1999 CRT** preset enables noise + interlacing automatically. Changes 
 ├── matrix-config.sh      # Interactive configuration TUI
 ├── matrix-startup.sh     # Full animation script
 ├── matrix-header.sh      # Header-only script
-└── shaders/
-    ├── crt-full.glsl     # Full 1999 CRT (curvature + mask + optional effects)
-    ├── crt-shutdown.glsl # CRT power-down animation
-    ├── crt.glsl          # CRT scanlines only
-    ├── bloom.glsl        # Phosphor bloom (default)
-    └── matrix-glow.glsl  # Subtle green glow
+├── shaders/
+│   ├── crt-full.glsl     # Full 1999 CRT (curvature + mask + optional effects)
+│   ├── retro-crt.glsl    # Configurable CRT (green/amber/white phosphor)
+│   ├── crt-shutdown.glsl # CRT power-down animation
+│   ├── crt.glsl          # CRT scanlines only
+│   ├── bloom.glsl        # Phosphor bloom (default)
+│   └── matrix-glow.glsl  # Subtle green glow
+└── eras/
+    ├── era-lib.sh        # Shared library
+    ├── era-boot.sh       # Era boot sequence display
+    ├── era-punchcard.sh  # IBM 029 keypunch simulator
+    ├── era-enigma.sh     # Enigma M3 rotor machine
+    ├── era-frontpanel.sh # Altair/PDP-8 front panel
+    ├── era-basic.sh      # Universal BASIC interpreter
+    ├── era-dos.sh        # DOS prompt simulator
+    ├── era-bbs.sh        # BBS terminal
+    ├── era-teletype.sh   # ASR-33 teletype
+    ├── era-3270.sh       # IBM 3270 block mode
+    └── era-unix.sh       # Classic Unix shells
 
 ~/.local/bin/
 ├── cxxmatrix             # Matrix rain binary

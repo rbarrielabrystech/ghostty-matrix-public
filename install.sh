@@ -61,6 +61,11 @@ fi
 # Copy shaders
 cp shaders/*.glsl ~/.config/ghostty/shaders/
 
+# Copy eras (interactive terminal simulations)
+mkdir -p ~/.config/ghostty/eras
+cp eras/*.sh ~/.config/ghostty/eras/
+chmod +x ~/.config/ghostty/eras/*.sh
+
 # Platform-specific setup
 case "$OS_TYPE" in
     macos)
@@ -226,6 +231,12 @@ alias matrix-mandelbrot='~/.local/bin/cxxmatrix -s mandelbrot 2>/dev/null || cxx
 alias matrix-full='~/.local/bin/cxxmatrix -s number,banner,rain,conway,mandelbrot,loop 2>/dev/null || cxxmatrix -s number,banner,rain,conway,mandelbrot,loop'
 alias matrix-custom='~/.local/bin/cxxmatrix -m 2>/dev/null || cxxmatrix -m'
 alias matrix-config='~/.config/ghostty/matrix-config.sh'
+alias matrix-era='~/.config/ghostty/eras/era-boot.sh'
+
+# Era boot (if set)
+if [ -n "${MATRIX_ERA:-}" ] && [ -f ~/.config/ghostty/eras/era-boot.sh ]; then
+    ~/.config/ghostty/eras/era-boot.sh
+fi
 
 # CRT shutdown animation (swap shader, animate, restore, exit)
 matrix-shutdown() {
