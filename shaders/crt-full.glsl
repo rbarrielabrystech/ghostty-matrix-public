@@ -7,6 +7,7 @@
 //
 // Adapted for Ghostty with curvature and shadow mask enabled
 // for authentic late-90s CRT monitor appearance.
+// Cranked to 100% - Neo's actual monitor.
 //
 //==============================================================
 //      LICENSE = UNLICENSE (aka PUBLIC DOMAIN)
@@ -17,13 +18,13 @@
 
 // "Scanlines" per real screen pixel.
 //  High DPI: 0.33333333 | Low DPI: 0.66666666
-#define SCALE 0.5
+#define SCALE 0.48
 
 // "Tube" curvature - authentic CRT barrel distortion
 #define CRTS_WARP 1
 
 // Vignette darkness in corners (0.0=black, 1.0=none)
-#define MIN_VIN 0.75
+#define MIN_VIN 0.65
 
 // Shadow mask - simulates RGB phosphor triads
 // #define CRTS_MASK_GRILLE 1
@@ -32,13 +33,39 @@
 #define CRTS_MASK_SHADOW 1
 
 // Scanline thinness (0.50=fused, 0.70=default, 1.00=very thin)
-#define INPUT_THIN 0.65
+#define INPUT_THIN 0.70
 
 // Horizontal scan blur (-3.0=pixely, -2.5=default, -2.0=smooth)
-#define INPUT_BLUR -2.5
+#define INPUT_BLUR -2.6
 
 // Shadow mask intensity (0.25=heavy, 0.50=default, 1.00=none)
-#define INPUT_MASK 0.60
+#define INPUT_MASK 0.52
+
+// --- New 1999 Authenticity Controls ---
+
+// Phosphor bloom intensity (0.0=none, 1.0=heavy)
+#define BLOOM_AMOUNT 0.15
+
+// Bloom spread in texels
+#define BLOOM_SPREAD 1.5
+
+// Chromatic aberration strength (RGB gun convergence error)
+#define CHROMA_SHIFT 0.2
+
+// Screen flicker intensity (60Hz refresh shimmer)
+#define FLICKER_AMOUNT 0.015
+
+// Phosphor persistence/afterglow brightness boost
+#define PHOSPHOR_BOOST 1.08
+
+// Edge shadow - darkens the very edge of the "tube glass"
+#define EDGE_SHADOW 0.93
+
+// Green phosphor glow intensity (0.0=none, 1.0=heavy)
+#define GREEN_GLOW 0.12
+
+// Green phosphor glow color (P1 phosphor: warm green)
+#define GLOW_COLOR vec3(0.1, 1.0, 0.3)
 
 float FromSrgb1(float c) {
   return (c <= 0.04045) ? c * (1.0 / 12.92) :
@@ -212,22 +239,85 @@ vec3 ToSrgb(vec3 c) {
     ToSrgb1(c.r), ToSrgb1(c.g), ToSrgb1(c.b));
 }
 
+// Cheap bloom: sample surrounding pixels and average
+vec3 sampleBloom(vec2 uv, vec2 texelSize) {
+  vec3 bloom = vec3(0.0);
+  float spread = BLOOM_SPREAD;
+  bloom += FromSrgb(texture(iChannel0, uv + vec2(-spread, -spread) * texelSize).rgb);
+  bloom += FromSrgb(texture(iChannel0, uv + vec2( spread, -spread) * texelSize).rgb);
+  bloom += FromSrgb(texture(iChannel0, uv + vec2(-spread,  spread) * texelSize).rgb);
+  bloom += FromSrgb(texture(iChannel0, uv + vec2( spread,  spread) * texelSize).rgb);
+  bloom += FromSrgb(texture(iChannel0, uv + vec2( 0.0,    -spread) * texelSize).rgb);
+  bloom += FromSrgb(texture(iChannel0, uv + vec2( 0.0,     spread) * texelSize).rgb);
+  bloom += FromSrgb(texture(iChannel0, uv + vec2(-spread,   0.0)   * texelSize).rgb);
+  bloom += FromSrgb(texture(iChannel0, uv + vec2( spread,   0.0)   * texelSize).rgb);
+  return bloom / 8.0;
+}
+
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   float aspect = iResolution.x / iResolution.y;
+  vec2 texelSize = 1.0 / iResolution.xy;
+  vec2 uv = fragCoord.xy * texelSize;
+
+  // Gentle barrel distortion: 1/45 (slight bump from original 1/50)
+  vec2 warp = vec2(1.0 / (45.0 * aspect), 1.0 / 45.0);
+
+  // Core CRT filter
   fragColor.rgb = CrtsFilter(
       fragCoord.xy,
       vec2(1.0),
       iResolution.xy * SCALE * 0.5,
       1.0 / (iResolution.xy * SCALE),
-      1.0 / iResolution.xy,
-      2.0 / iResolution.xy,
+      texelSize,
+      2.0 * texelSize,
       iResolution.y,
-      vec2(1.0 / (50.0 * aspect), 1.0 / 50.0),
+      warp,
       INPUT_THIN,
       INPUT_BLUR,
       INPUT_MASK,
       CrtsTone(INPUT_THIN, INPUT_MASK)
     );
+
+  // --- Phosphor bloom ---
+  vec3 bloom = sampleBloom(uv, texelSize);
+  fragColor.rgb += bloom * BLOOM_AMOUNT;
+
+  // --- Green phosphor glow (P1 monochrome CRT) ---
+  float luma = dot(bloom, vec3(0.2126, 0.7152, 0.0722));
+  fragColor.rgb += GLOW_COLOR * luma * GREEN_GLOW;
+
+  // --- Phosphor persistence brightness boost ---
+  fragColor.rgb *= PHOSPHOR_BOOST;
+
+  // --- Chromatic aberration (RGB convergence error) ---
+  vec2 center = uv - 0.5;
+  float dist = length(center);
+  float shift = dist * CHROMA_SHIFT * texelSize.x * 3.0;
+  vec2 dir = normalize(center + 0.0001);
+  float rShift = FromSrgb1(texture(iChannel0, uv + dir * shift).r);
+  float bShift = FromSrgb1(texture(iChannel0, uv - dir * shift).b);
+  // Blend chromatic aberration with distance from center
+  float chromaBlend = smoothstep(0.1, 0.6, dist) * 0.4;
+  fragColor.r = mix(fragColor.r, rShift * PHOSPHOR_BOOST, chromaBlend);
+  fragColor.b = mix(fragColor.b, bShift * PHOSPHOR_BOOST, chromaBlend);
+
+  // --- 60Hz flicker ---
+  float flicker = 1.0 - FLICKER_AMOUNT * sin(iTime * 120.0 * 3.14159);
+  fragColor.rgb *= flicker;
+
+  // --- Edge shadow (tube glass rim) ---
+  vec2 edgeUV = uv * 2.0 - 1.0;
+  float edgeDist = max(abs(edgeUV.x), abs(edgeUV.y));
+  float edgeFade = smoothstep(EDGE_SHADOW, 1.0, edgeDist);
+  fragColor.rgb *= 1.0 - edgeFade * 0.6;
+
+  // --- Black out beyond the curved tube ---
+  vec2 curvedUV = edgeUV * vec2(
+    1.0 + (edgeUV.y * edgeUV.y) * warp.x,
+    1.0 + (edgeUV.x * edgeUV.x) * warp.y);
+  if (abs(curvedUV.x) > 1.02 || abs(curvedUV.y) > 1.02) {
+    fragColor.rgb = vec3(0.0);
+  }
 
   fragColor = vec4(ToSrgb(fragColor.rgb), 1.0);
 }
