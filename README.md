@@ -417,6 +417,10 @@ which gawk
 # If missing: brew install gawk / sudo apt install gawk
 ```
 
+## Documentation
+
+- **[HISTORY.md](HISTORY.md)** — Comprehensive history of every terminal era, the Matrix philosophy, CRT technology, and the cultural context of 55 years of computing
+
 ## Credits & Acknowledgments
 
 This project builds upon and is inspired by the following open source projects:
