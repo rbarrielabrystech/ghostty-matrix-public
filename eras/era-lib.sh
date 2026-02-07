@@ -9,11 +9,10 @@ read_matrix_conf() {
     local key="$1" default="$2"
     if [ -f "$MATRIX_CONF" ]; then
         local val
-        val=$(grep "^${key}=" "$MATRIX_CONF" 2>/dev/null | tail -1 | cut -d'=' -f2- | sed 's/^"//;s/"$//' | xargs)
-        [ -n "$val" ] && echo "$val" || echo "$default"
-    else
-        echo "$default"
+        val=$(grep -E "^${key}=" "$MATRIX_CONF" 2>/dev/null | tail -1 | cut -d'=' -f2- | tr -d '"' | tr -d "'")
+        [ -n "$val" ] && { echo "$val"; return; }
     fi
+    echo "$default"
 }
 
 era_name() { read_matrix_conf "MATRIX_ERA" ""; }

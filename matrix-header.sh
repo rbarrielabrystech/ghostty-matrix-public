@@ -10,21 +10,26 @@
 # Cross-platform config path
 MATRIX_CONFIG="${MATRIX_CONFIG:-$HOME/.config/ghostty/matrix.conf}"
 
-# Load user configuration if it exists
-if [ -f "$MATRIX_CONFIG" ]; then
-    # shellcheck source=/dev/null
-    source "$MATRIX_CONFIG"
-fi
+# Safe config reader (reads key=value without executing arbitrary code)
+_read_conf() {
+    local key="$1" default="$2"
+    if [ -f "$MATRIX_CONFIG" ]; then
+        local val
+        val=$(grep -E "^${key}=" "$MATRIX_CONFIG" 2>/dev/null | tail -1 | cut -d'=' -f2- | tr -d '"' | tr -d "'")
+        [ -n "$val" ] && { echo "$val"; return; }
+    fi
+    echo "$default"
+}
 
-# Default values (if not set in config)
-MATRIX_SHOW_HEADER="${MATRIX_SHOW_HEADER:-true}"
-MATRIX_SHOW_QUOTE="${MATRIX_SHOW_QUOTE:-true}"
-MATRIX_SHOW_SYSTEM_INFO="${MATRIX_SHOW_SYSTEM_INFO:-true}"
-MATRIX_CUSTOM_QUOTES="${MATRIX_CUSTOM_QUOTES:-}"
-MATRIX_CUSTOM_COLORS="${MATRIX_CUSTOM_COLORS:-false}"
-MATRIX_COLOR_PRIMARY="${MATRIX_COLOR_PRIMARY:-0;32m}"
-MATRIX_COLOR_BRIGHT="${MATRIX_COLOR_BRIGHT:-1;32m}"
-MATRIX_COLOR_DIM="${MATRIX_COLOR_DIM:-2;32m}"
+# Load configuration values
+MATRIX_SHOW_HEADER=$(_read_conf "MATRIX_SHOW_HEADER" "true")
+MATRIX_SHOW_QUOTE=$(_read_conf "MATRIX_SHOW_QUOTE" "true")
+MATRIX_SHOW_SYSTEM_INFO=$(_read_conf "MATRIX_SHOW_SYSTEM_INFO" "true")
+MATRIX_CUSTOM_QUOTES=$(_read_conf "MATRIX_CUSTOM_QUOTES" "")
+MATRIX_CUSTOM_COLORS=$(_read_conf "MATRIX_CUSTOM_COLORS" "false")
+MATRIX_COLOR_PRIMARY=$(_read_conf "MATRIX_COLOR_PRIMARY" "0;32m")
+MATRIX_COLOR_BRIGHT=$(_read_conf "MATRIX_COLOR_BRIGHT" "1;32m")
+MATRIX_COLOR_DIM=$(_read_conf "MATRIX_COLOR_DIM" "2;32m")
 
 # Exit early if header is disabled
 [ "$MATRIX_SHOW_HEADER" != "true" ] && exit 0
@@ -122,7 +127,7 @@ echo ""
 echo ""
 
 if [ "$MATRIX_SHOW_SYSTEM_INFO" = "true" ]; then
-    center_text "Operator: $(whoami)    Node: $(hostname -s 2>/dev/null || hostname)    Shell: $(basename $SHELL)"
+    center_text "Operator: $(whoami)    Node: $(hostname -s 2>/dev/null || hostname)    Shell: $(basename "$SHELL")"
     echo ""
     center_text "$(date '+%Y.%m.%d // %H:%M:%S')    Kernel: $(get_kernel_info)"
     echo ""

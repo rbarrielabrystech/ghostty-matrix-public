@@ -39,8 +39,24 @@ echo -e "${GREEN}Installing Matrix Ghostty Configuration...${NC}"
 mkdir -p ~/.config/ghostty/shaders
 mkdir -p ~/.local/bin
 
-# Copy config files
-cp config ~/.config/ghostty/config
+# Copy config files (backup existing config if present)
+if [ -f ~/.config/ghostty/config ]; then
+    _backup="$HOME/.config/ghostty/config.backup.$(date +%Y%m%d%H%M%S)"
+    cp ~/.config/ghostty/config "$_backup"
+    echo -e "${YELLOW}Existing config backed up to: $_backup${NC}"
+    echo -e "${YELLOW}Merging Matrix theme into existing config...${NC}"
+    # Remove any existing Matrix theme lines before appending
+    grep -v -E '^(background|foreground|cursor-color|cursor-text|cursor-style|selection-background|selection-foreground|split-divider-color|bold-is-bright|font-thicken|custom-shader|custom-shader-animation|palette)\s*=' ~/.config/ghostty/config > ~/.config/ghostty/config.tmp || true
+    # Remove old Matrix header comments if present
+    grep -v -E '^\s*#.*(THE MATRIX|MATRIX SHADER|shades of the Matrix|Phosphor|phosphor|the pill|the code|system alerts|blue pill|agents|data streams|bright green|the blinking truth|seeing through the code|boundaries of reality)' ~/.config/ghostty/config.tmp > ~/.config/ghostty/config.tmp2 || true
+    mv ~/.config/ghostty/config.tmp2 ~/.config/ghostty/config
+    rm -f ~/.config/ghostty/config.tmp
+    # Append Matrix theme settings
+    echo "" >> ~/.config/ghostty/config
+    cat config >> ~/.config/ghostty/config
+else
+    cp config ~/.config/ghostty/config
+fi
 cp matrix-startup.sh ~/.config/ghostty/matrix-startup.sh
 cp matrix-header.sh ~/.config/ghostty/matrix-header.sh
 cp matrix-config.sh ~/.config/ghostty/matrix-config.sh
@@ -103,15 +119,15 @@ case "$OS_TYPE" in
         fi
 
         if ! command -v cmatrix &> /dev/null; then
-            echo -e "${GREEN}Installing cmatrix fallback...${NC}"
+            echo -e "${YELLOW}cmatrix not found (optional fallback). To install:${NC}"
             if command -v apt &> /dev/null; then
-                sudo apt install -y cmatrix 2>/dev/null || echo "Install cmatrix: sudo apt install cmatrix"
+                echo "  sudo apt install cmatrix"
             elif command -v pacman &> /dev/null; then
-                sudo pacman -S --noconfirm cmatrix 2>/dev/null || echo "Install cmatrix: sudo pacman -S cmatrix"
+                echo "  sudo pacman -S cmatrix"
             elif command -v dnf &> /dev/null; then
-                sudo dnf install -y cmatrix 2>/dev/null || echo "Install cmatrix: sudo dnf install cmatrix"
+                echo "  sudo dnf install cmatrix"
             else
-                echo "Install cmatrix using your package manager"
+                echo "  Install cmatrix using your package manager"
             fi
         fi
         ;;
@@ -127,8 +143,8 @@ case "$OS_TYPE" in
         fi
 
         if ! command -v cmatrix &> /dev/null; then
-            echo -e "${GREEN}Installing cmatrix fallback...${NC}"
-            sudo apt install -y cmatrix 2>/dev/null || echo "Install cmatrix: sudo apt install cmatrix"
+            echo -e "${YELLOW}cmatrix not found (optional fallback). To install:${NC}"
+            echo "  sudo apt install cmatrix"
         fi
         ;;
     windows)
@@ -175,10 +191,15 @@ if ! grep -q "matrix-startup.sh" "$SHELL_RC" 2>/dev/null; then
 # Configure in ~/.config/ghostty/matrix.conf
 # ============================================================
 if [[ $- == *i* ]] && [[ "$TERM_PROGRAM" == "ghostty" ]]; then
-    # Load configuration
+    # Load configuration (safe grep-based read, no arbitrary code execution)
     MATRIX_CONFIG="$HOME/.config/ghostty/matrix.conf"
     MATRIX_ANIMATION_FREQUENCY="daily"
-    [ -f "$MATRIX_CONFIG" ] && source "$MATRIX_CONFIG"
+    if [ -f "$MATRIX_CONFIG" ]; then
+        _freq=$(grep -E "^MATRIX_ANIMATION_FREQUENCY=" "$MATRIX_CONFIG" 2>/dev/null | tail -1 | cut -d'=' -f2- | tr -d '"' | tr -d "'")
+        [ -n "$_freq" ] && MATRIX_ANIMATION_FREQUENCY="$_freq"
+        unset _freq
+        MATRIX_ERA=$(grep -E "^MATRIX_ERA=" "$MATRIX_CONFIG" 2>/dev/null | tail -1 | cut -d'=' -f2- | tr -d '"' | tr -d "'")
+    fi
 
     # Cross-platform temp directory
     _matrix_tmp="${TMPDIR:-${TMP:-/tmp}}"
@@ -218,7 +239,7 @@ if [[ $- == *i* ]] && [[ "$TERM_PROGRAM" == "ghostty" ]]; then
             unset _matrix_lock _matrix_date
             ;;
     esac
-    unset _matrix_tmp MATRIX_CONFIG MATRIX_ANIMATION_FREQUENCY
+    unset _matrix_tmp MATRIX_CONFIG MATRIX_ANIMATION_FREQUENCY MATRIX_ERA
 fi
 # ============================================================
 
@@ -239,6 +260,14 @@ if [ -n "${MATRIX_ERA:-}" ] && [ -f ~/.config/ghostty/eras/era-boot.sh ]; then
 fi
 
 # CRT shutdown animation (swap shader, animate, restore, exit)
+_matrix_sed_inplace() {
+    if sed --version 2>/dev/null | grep -q GNU; then
+        sed -i "$@"
+    else
+        sed -i '' "$@"
+    fi
+}
+
 matrix-shutdown() {
     # Only works in interactive Ghostty terminals
     if [[ "$TERM_PROGRAM" != "ghostty" ]] || [[ $- != *i* ]]; then
@@ -272,19 +301,11 @@ matrix-shutdown() {
     local _original_shader
     _original_shader=$(grep -E "^custom-shader\s*=" "$_ghostty_conf" 2>/dev/null | tail -1 | sed 's/^[^=]*=\s*//')
 
-    # BSD/GNU sed detection
-    local _sed_i
-    if sed --version 2>/dev/null | grep -q GNU; then
-        _sed_i="sed -i"
-    else
-        _sed_i="sed -i ''"
-    fi
-
     # Swap to shutdown shader (triggers hot-reload)
     if grep -qE "^custom-shader\s*=" "$_ghostty_conf" 2>/dev/null; then
-        eval "$_sed_i" "'s|^custom-shader *=.*|custom-shader = $_shutdown_shader|'" "$_ghostty_conf"
+        _matrix_sed_inplace "s|^custom-shader *=.*|custom-shader = ${_shutdown_shader}|" "$_ghostty_conf"
     else
-        echo "custom-shader = $_shutdown_shader" >> "$_ghostty_conf"
+        echo "custom-shader = ${_shutdown_shader}" >> "$_ghostty_conf"
     fi
 
     # Wait for animation (1.6s + buffer)
@@ -292,9 +313,9 @@ matrix-shutdown() {
 
     # Restore original shader
     if [ -n "$_original_shader" ]; then
-        eval "$_sed_i" "'s|^custom-shader *=.*|custom-shader = $_original_shader|'" "$_ghostty_conf"
+        _matrix_sed_inplace "s|^custom-shader *=.*|custom-shader = ${_original_shader}|" "$_ghostty_conf"
     else
-        eval "$_sed_i" "'/^custom-shader *=/d'" "$_ghostty_conf"
+        _matrix_sed_inplace '/^custom-shader *=/d' "$_ghostty_conf"
     fi
 
     builtin exit "$@"
@@ -323,6 +344,14 @@ if grep -q "matrix-startup.sh" "$SHELL_RC" 2>/dev/null && ! grep -q "matrix-shut
     cat >> "$SHELL_RC" << 'SHUTDOWN_EOF'
 
 # CRT shutdown animation (swap shader, animate, restore, exit)
+_matrix_sed_inplace() {
+    if sed --version 2>/dev/null | grep -q GNU; then
+        sed -i "$@"
+    else
+        sed -i '' "$@"
+    fi
+}
+
 matrix-shutdown() {
     if [[ "$TERM_PROGRAM" != "ghostty" ]] || [[ $- != *i* ]]; then
         builtin exit "$@"
@@ -346,22 +375,16 @@ matrix-shutdown() {
     fi
     local _original_shader
     _original_shader=$(grep -E "^custom-shader\s*=" "$_ghostty_conf" 2>/dev/null | tail -1 | sed 's/^[^=]*=\s*//')
-    local _sed_i
-    if sed --version 2>/dev/null | grep -q GNU; then
-        _sed_i="sed -i"
-    else
-        _sed_i="sed -i ''"
-    fi
     if grep -qE "^custom-shader\s*=" "$_ghostty_conf" 2>/dev/null; then
-        eval "$_sed_i" "'s|^custom-shader *=.*|custom-shader = $_shutdown_shader|'" "$_ghostty_conf"
+        _matrix_sed_inplace "s|^custom-shader *=.*|custom-shader = ${_shutdown_shader}|" "$_ghostty_conf"
     else
-        echo "custom-shader = $_shutdown_shader" >> "$_ghostty_conf"
+        echo "custom-shader = ${_shutdown_shader}" >> "$_ghostty_conf"
     fi
     sleep 2
     if [ -n "$_original_shader" ]; then
-        eval "$_sed_i" "'s|^custom-shader *=.*|custom-shader = $_original_shader|'" "$_ghostty_conf"
+        _matrix_sed_inplace "s|^custom-shader *=.*|custom-shader = ${_original_shader}|" "$_ghostty_conf"
     else
-        eval "$_sed_i" "'/^custom-shader *=/d'" "$_ghostty_conf"
+        _matrix_sed_inplace '/^custom-shader *=/d' "$_ghostty_conf"
     fi
     builtin exit "$@"
 }
