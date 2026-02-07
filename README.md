@@ -1,6 +1,6 @@
 # Matrix Ghostty Theme
 
-High-fidelity Matrix (1999) terminal setup for [Ghostty](https://ghostty.org/).
+A terminal time machine for [Ghostty](https://ghostty.org/) — from WWII Enigma machines to Windows 98, with an authentic Matrix (1999) aesthetic as home base.
 
 ![Matrix Theme Demo](https://raw.githubusercontent.com/rbarrielabrystech/ghostty-matrix-public/main/demo.gif)
 
@@ -8,21 +8,23 @@ High-fidelity Matrix (1999) terminal setup for [Ghostty](https://ghostty.org/).
 
 **Cross-platform:** Linux, macOS, Windows (WSL/Git Bash)
 
-## Features
+---
 
-- **Authentic Matrix rain** using [cxxmatrix](https://github.com/akinomyoga/cxxmatrix) with half-width katakana
-- **Movie-accurate startup sequence**: number fall → rain → "WAKE UP NEO" banner → "Follow the white rabbit."
-- **Full 1999 CRT mode**: barrel distortion, scanlines, shadow mask, vignette — like sitting in front of a CRT monitor in 1999
-- **CRT shutdown animation**: authentic power-down effect (brightness spike → vertical collapse → phosphor afterglow)
-- **Enhanced CRT effects**: toggleable static noise, horizontal jitter, interlacing, and halation
-- **6 shader effects**: CRT Full, Retro CRT (switchable phosphor), CRT Scanlines, Phosphor Bloom, Matrix Glow, CRT Shutdown
-- **30 Terminal Eras**: Time-travel from WWII Enigma machines to Windows 98 with authentic palettes, boot messages, and interactive simulators
-- **Interactive configuration TUI** (`matrix-config`): presets, terminal eras, shader picker, CRT effects, shutdown config, 25+ settings
-- **5 one-click presets**: Full 1999 CRT, CRT Lite, Phosphor Bloom, Subtle Glow, Clean Terminal
-- **Phosphor-green color scheme** with accurate `#0d0208` background
-- **Fully configurable**: animation frequency, duration, sequences, colors, quotes, and more
-- **Skip animation** with any keypress
-- **Cross-platform**: Works on Linux, macOS, and Windows (WSL/Git Bash)
+## Table of Contents
+
+- [Quick Install](#quick-install)
+- [Terminal Eras — Time Machine](#terminal-eras--time-machine)
+- [Matrix Theme](#matrix-theme)
+- [Shaders](#shaders)
+- [Commands](#commands)
+- [Configuration](#configuration)
+- [All Settings Reference](#all-settings-reference)
+- [File Structure](#file-structure)
+- [Manual Installation](#manual-installation)
+- [Troubleshooting](#troubleshooting)
+- [Credits & Acknowledgments](#credits--acknowledgments)
+
+---
 
 ## Quick Install
 
@@ -33,13 +35,13 @@ chmod +x install.sh
 ./install.sh
 ```
 
-The installer will:
-- Detect your OS (Linux, macOS, WSL, Windows)
-- Copy configuration files
-- Add shell integration to your `.zshrc` or `.bashrc`
-- Provide instructions for installing dependencies
+The installer detects your OS, copies all files, and adds shell integration to your `.zshrc` or `.bashrc`.
 
-## Platform Support
+**Try it right away:**
+
+```bash
+matrix-config    # Opens the interactive TUI — press 'e' for Terminal Eras
+```
 
 | Platform | Status | Notes |
 |----------|--------|-------|
@@ -48,186 +50,40 @@ The installer will:
 | WSL2 | Full | Best Windows experience |
 | Git Bash | Partial | Some features limited |
 
-## Configuration
-
-Run the interactive configuration menu:
-
-```bash
-matrix-config
-```
-
-This opens a full TUI with two screens:
-
-### Presets (one-click setup)
-
-| Preset | Shader | Description |
-|--------|--------|-------------|
-| **Full 1999 CRT** | `crt-full.glsl` | Curvature + scanlines + shadow mask + vignette, noise + interlace, shutdown animation |
-| **CRT Lite** | `crt.glsl` | Scanlines without curvature, slightly transparent |
-| **Phosphor Bloom** | `bloom.glsl` | Soft glow around text, very readable (recommended) |
-| **Subtle Glow** | `matrix-glow.glsl` | Minimal green glow, for daily driving |
-| **Clean Terminal** | none | Matrix colors only, no shader effects |
-
-### Custom Settings
-
-Press `c` from the presets screen to access individual controls:
-
-| Category | Settings |
-|----------|----------|
-| **Shader** | Shader picker with descriptions for all 5 options |
-| **Animation** | Frequency, duration, sequence, text sequence, typing speed, skip, diffuse, twinkle |
-| **Terminal** | Font thicken (phosphor), font size, background opacity, cursor style/blink, window padding |
-| **Header** | Show/hide header, quote, system info |
-| **CRT Effects** | Static noise, horizontal jitter, interlacing, enhanced halation (crt-full only) |
-| **Shutdown** | CRT shutdown effect on/off, auto-trigger on exit |
-
-### Manual Configuration
-
-You can also edit the config files directly:
-
-```bash
-# Matrix animation/behavior settings
-nano ~/.config/ghostty/matrix.conf
-
-# Ghostty terminal settings (shader, font, colors)
-nano ~/.config/ghostty/config
-```
-
-### Key Settings (matrix.conf)
-
-| Setting | Options | Default | Description |
-|---------|---------|---------|-------------|
-| `MATRIX_ANIMATION_FREQUENCY` | daily, weekly, always, never | daily | How often to run animation |
-| `MATRIX_ANIMATION_DURATION` | seconds | 8 | Duration of matrix rain |
-| `MATRIX_SHOW_TEXT_SEQUENCE` | true, false | true | Show "Wake up, Neo..." |
-| `MATRIX_SHOW_QUOTE` | true, false | true | Show random Matrix quote |
-| `MATRIX_ALLOW_SKIP` | true, false | true | Allow skipping with keypress |
-| `MATRIX_CUSTOM_QUOTES` | pipe-separated | "" | Add your own quotes |
-| `MATRIX_SEQUENCE` | see below | number,rain,banner | cxxmatrix animation sequence |
-| `MATRIX_DIFFUSE` | true, false | true | Background glow in animation |
-| `MATRIX_TWINKLE` | true, false | true | Brightness fluctuations |
-| `MATRIX_SHUTDOWN_ANIMATION` | true, false | true | CRT power-down on `matrix-off` |
-| `MATRIX_SHUTDOWN_ON_EXIT` | true, false | false | Auto-trigger shutdown on `exit` |
-| `MATRIX_CRT_NOISE` | true, false | false | Static noise (crt-full only) |
-| `MATRIX_CRT_JITTER` | true, false | false | Horizontal jitter (crt-full only) |
-| `MATRIX_CRT_INTERLACE` | true, false | false | Interlacing (crt-full only) |
-| `MATRIX_CRT_HALATION` | true, false | false | Enhanced halation (crt-full only) |
-| `MATRIX_ERA` | era ID or empty | "" | Current terminal era (empty = Matrix) |
-| `MATRIX_ERA_INTERACTIVE` | true, false | false | Launch interactive simulation on new terminal |
-
-See `matrix.conf` for all available options.
-
-## Startup Sequence
-
-When you open Ghostty (first terminal of the day by default):
-
-1. **Number fall** - Digits raining down
-2. **Katakana rain** - Authentic half-width characters
-3. **"WAKE UP NEO"** - Banner emerges from the rain
-4. **Typing effect** - "Wake up, Neo... The Matrix has you... Follow the white rabbit."
-5. **System info** - Your operator status
-6. **Random quote** - Classic Matrix wisdom
-
-Press any key to skip at any point.
-
-## Commands
-
-```bash
-matrix-config       # Interactive configuration TUI
-matrix              # Run full startup sequence
-matrix-demo         # Reset lock and re-trigger animation
-matrix-off          # CRT shutdown animation + exit
-matrix-era          # Launch current era boot sequence
-matrix-rain         # Endless katakana rain
-matrix-conway       # Conway's Game of Life
-matrix-mandelbrot   # Mandelbrot fractal zoom
-matrix-full         # All scenes in a loop
-```
-
-## Shaders
-
-Located in `shaders/`. Switch between them via `matrix-config` or edit `~/.config/ghostty/config` directly.
-
-| Shader | Description | Effect | CPU Usage |
-|--------|-------------|--------|-----------|
-| `crt-full.glsl` | Full 1999 CRT | Barrel distortion, scanlines, shadow mask, vignette, optional noise/jitter/interlace/halation | Medium |
-| `retro-crt.glsl` | Retro CRT (Eras) | Switchable phosphor (green/amber/white/color), softer defaults | Medium |
-| `crt.glsl` | CRT Scanlines | Scanlines only, no curvature | Medium |
-| `bloom.glsl` | Phosphor Bloom (recommended) | Soft glow around bright text | Low |
-| `matrix-glow.glsl` | Matrix Glow | Subtle green glow, minimal | Low |
-| `crt-shutdown.glsl` | CRT Shutdown | Power-down animation (used internally by `matrix-off`) | Low |
-
-To change shader manually:
-```bash
-# In ~/.config/ghostty/config
-custom-shader = ~/.config/ghostty/shaders/crt-full.glsl
-```
-
-To disable shaders:
-```bash
-# Comment out or remove the line
-# custom-shader = ...
-```
-
-### CRT Shutdown Animation
-
-Run `matrix-off` to trigger a classic CRT power-down sequence before closing the terminal:
-
-1. **Brightness spike** (0.0-0.25s) — capacitor discharge, screen flashes white-green
-2. **Vertical collapse** (0.25-0.70s) — screen squeezes to a horizontal line
-3. **Horizontal shrink** (0.70-1.10s) — line collapses to a center dot
-4. **Phosphor afterglow** (1.10-1.60s) — green dot fades with P1 phosphor color
-5. **Black** (1.60s+) — terminal exits
-
-This works by exploiting Ghostty's shader hot-reload (1.2.0+) — the shell function swaps the active shader to `crt-shutdown.glsl`, waits for the animation, restores the original shader, then exits. In non-Ghostty terminals, `matrix-off` simply exits.
-
-To auto-trigger on every `exit`, set `MATRIX_SHUTDOWN_ON_EXIT=true` in `matrix.conf`.
-
-### Enhanced CRT Effects (crt-full only)
-
-When using the `crt-full.glsl` shader, four additional effects can be toggled via `matrix-config` (Custom > CRT Effects) or by editing the shader directly:
-
-| Effect | Description | Default |
-|--------|-------------|---------|
-| **Static Noise** | Film grain / signal noise | Off |
-| **Horizontal Jitter** | Per-scanline signal instability | Off |
-| **Interlacing** | Alternating field darkening (60Hz) | Off |
-| **Enhanced Halation** | Wide-spread bloom from internal glass reflections | Off |
-
-The **Full 1999 CRT** preset enables noise + interlacing automatically. Changes take effect in real-time via Ghostty's shader hot-reload.
+---
 
 ## Terminal Eras — Time Machine
 
 Transform your terminal into any classic computer from the 1940s to 2000. Each era is a living, interactive experience — you don't just read about punch cards, you punch them.
 
-Access via `matrix-config` > `e) Terminal Eras...`.
+Access via `matrix-config` > `e) Terminal Eras...`, or run `matrix-era` directly.
 
-### How It Works
+### What Happens When You Select an Era
 
-When you select an era, four things change simultaneously:
+Four things change simultaneously:
 
-1. **Color palette** — All 16 ANSI colors, background, foreground, and cursor are set to match the original hardware. The Commodore 64 gets its Pepto-measured blue palette. The VT100 gets green phosphor. The ZX Spectrum gets its 8+8 bright/normal scheme.
+1. **Color palette** — All 16 ANSI colors, background, foreground, and cursor match the original hardware. The Commodore 64 gets its Pepto-measured blue palette. The VT100 gets green phosphor. The ZX Spectrum gets its 8+8 bright/normal scheme.
 
-2. **CRT shader** — Early terminals get the `retro-crt.glsl` shader with the correct phosphor color (green for VT100/Apple II, amber for VT220, white for TRS-80). Color systems like the C64 get CRT effects without phosphor tinting. Pre-CRT machines (punch cards, teletypes) get no shader at all — they didn't have screens.
+2. **CRT shader** — Terminals with cathode-ray tubes get the `retro-crt.glsl` shader with the correct phosphor color: green for VT100 and Apple II, amber for VT220, white for TRS-80. Color systems like the C64 get CRT scanlines without phosphor tinting. Pre-CRT machines (punch cards, teletypes) get no shader — they didn't have screens. The `retro-crt.glsl` shader is selected automatically by the era system; it is not available as a standalone choice in the shader picker.
 
-3. **Boot message** — Every new terminal window displays the exact startup text you'd see powering on the real machine. The C64 shows `**** COMMODORE 64 BASIC V2 ****` / `64K RAM SYSTEM  38911 BASIC BYTES FREE`. The Linux era boots through LILO with kernel messages and BogoMIPS calibration.
+3. **Boot message** — Every new terminal window shows the exact startup text you'd see powering on the real machine. The C64 prints `**** COMMODORE 64 BASIC V2 ****` / `64K RAM SYSTEM  38911 BASIC BYTES FREE`. The Linux era boots through LILO with kernel messages and BogoMIPS calibration.
 
-4. **Interactive simulation** (optional) — With interactive mode enabled, the era's simulator launches automatically. A working BASIC interpreter, a functional punch card machine, a real Enigma cipher — not mockups, but actual implementations you can use.
+4. **Interactive simulation** (optional) — With interactive mode on, the era's simulator launches automatically. A working BASIC interpreter, a functional punch card machine, a real Enigma cipher — not mockups, but actual implementations you can use.
 
 ### Quick Start
 
 ```bash
-matrix-config          # Open configuration TUI
+matrix-config          # Open the TUI
                        # Press 'e' for Terminal Eras
                        # Select a category (1-9)
                        # Pick an era
                        # Press 'i' to toggle interactive mode
 ```
 
-Or launch an era boot directly:
+Or launch the current era's boot sequence directly:
 
 ```bash
-matrix-era             # Show current era's boot sequence
+matrix-era             # Show current era's boot message
 ```
 
 To return to the default Matrix theme, press `m` in the Terminal Eras menu.
@@ -286,7 +142,7 @@ To return to the default Matrix theme, press `m` in the Terminal Eras menu.
 |---|-----|-----------|-------------|
 | 22 | **IBM MDA** | DOS prompt | Monochrome Display Adapter, green phosphor, DOS 3.30 |
 | 23 | **IBM CGA** | DOS prompt | Color Graphics Adapter, 16-color palette |
-| 24 | **MS-DOS** | DOS prompt | MS-DOS 6.22, HIMEM, full command set |
+| 24 | **MS-DOS / VGA** | DOS prompt | MS-DOS 6.22, HIMEM, full command set |
 
 #### Professional Unix (1985-1998)
 
@@ -325,16 +181,16 @@ A real punch card machine. Type characters and watch Hollerith punch patterns ap
 - **Greenbar output** — Job results printed on alternating green/white paper
 
 ```
-╔══════════════════════════════════════════════════════════════╗
-║ IBM 029 KEYPUNCH                              COLUMN: 06    ║
-╠══════════════════════════════════════════════════════════════╣
-║ CARD: HELLO _                                               ║
-║ 12: □□■□□ □□□□□ □□□□□ □□□□□ ...                            ║
-║ 11: □□□□□ □□□□□ □□□□□ □□□□□ ...                            ║
-║  0: □□□□□ ■□□□□ □□□□□ □□□□□ ...                            ║
-║  1: □□□□□ □□□□□ □□□□□ □□□□□ ...                            ║
-║  ...                                                         ║
-╚══════════════════════════════════════════════════════════════╝
++----------------------------------------------------------------------+
+| IBM 029 KEYPUNCH                                        COLUMN: 06   |
+|----------------------------------------------------------------------|
+| CARD: HELLO _                                                        |
+| 12: ..X.. ..... ..... ..... ...                                      |
+| 11: ..... ..... ..... ..... ...                                      |
+|  0: ..... X.... ..... ..... ...                                      |
+|  1: ..... ..... ..... ..... ...                                      |
+|  ...                                                                 |
++----------------------------------------------------------------------+
 ```
 
 #### Enigma M3 Cipher Machine (`era-enigma.sh`)
@@ -423,24 +279,24 @@ A virtual DOS environment with an in-memory filesystem. Three variants: IBM PC D
 Pre-populated filesystem:
 ```
 C:\
-├── AUTOEXEC.BAT      (viewable with TYPE)
-├── CONFIG.SYS        (viewable with TYPE)
-├── COMMAND.COM
-├── DOS\
-│   ├── EDIT.COM, FORMAT.COM, FDISK.EXE
-│   ├── HIMEM.SYS, EMM386.EXE, DOSKEY.COM
-│   └── MEM.EXE, CHKDSK.EXE, XCOPY.EXE
-├── GAMES\
-│   ├── DOOM.EXE, WOLF3D.EXE, PRINCE.EXE
-├── WINDOWS\
-└── UTILS\
++-- AUTOEXEC.BAT      (viewable with TYPE)
++-- CONFIG.SYS        (viewable with TYPE)
++-- COMMAND.COM
++-- DOS\
+|   +-- EDIT.COM, FORMAT.COM, FDISK.EXE
+|   +-- HIMEM.SYS, EMM386.EXE, DOSKEY.COM
+|   +-- MEM.EXE, CHKDSK.EXE, XCOPY.EXE
++-- GAMES\
+|   +-- DOOM.EXE, WOLF3D.EXE, PRINCE.EXE
++-- WINDOWS\
++-- UTILS\
 ```
 
 #### BBS Terminal (`era-bbs.sh`)
 
 The complete 1990s dial-up BBS experience:
 
-1. **Modem connection** — `ATDT 555-0199` → `RING...` → `CONNECT 14400/ARQ/V.32bis/LAPM`
+1. **Modem connection** — `ATDT 555-0199` > `RING...` > `CONNECT 14400/ARQ/V.32bis/LAPM`
 2. **ANSI art welcome screen** — Colorful ASCII art banner
 3. **Login** — Handle and password prompt
 4. **Main menu** — Navigate with single-key commands:
@@ -488,48 +344,260 @@ The Linux variant boots through LILO with full kernel messages. The Solaris vari
 
 A Model 33 teletype at 110 baud — every character printed with a ~100ms delay, simulating the mechanical print head. All output is uppercase. Includes BASIC mode (launches `era-basic.sh` in teletype mode) and a standalone command mode with paper tape punching.
 
-### Era Settings
+---
+
+## Matrix Theme
+
+The default mode. A high-fidelity recreation of the Matrix (1999) aesthetic: phosphor-green on near-black, CRT barrel distortion, katakana rain, and the iconic startup sequence.
+
+### Startup Sequence
+
+When you open Ghostty (first terminal of the day by default):
+
+1. **Number fall** — Digits raining down
+2. **Katakana rain** — Authentic half-width characters via [cxxmatrix](https://github.com/akinomyoga/cxxmatrix)
+3. **"WAKE UP NEO"** — Banner emerges from the rain
+4. **Typing effect** — "Wake up, Neo... The Matrix has you... Follow the white rabbit."
+5. **System info** — Your operator status
+6. **Random quote** — Classic Matrix wisdom
+
+Press any key to skip at any point.
+
+### Presets
+
+Five one-click presets available via `matrix-config`:
+
+| Preset | Shader | Description |
+|--------|--------|-------------|
+| **Full 1999 CRT** | `crt-full.glsl` | Curvature + scanlines + shadow mask + vignette, noise + interlace, shutdown animation |
+| **CRT Lite** | `crt.glsl` | Scanlines without curvature, slightly transparent |
+| **Phosphor Bloom** | `bloom.glsl` | Soft glow around text, very readable (recommended) |
+| **Subtle Glow** | `matrix-glow.glsl` | Minimal green glow, for daily driving |
+| **Clean Terminal** | none | Matrix colors only, no shader effects |
+
+### CRT Shutdown Animation
+
+Run `matrix-off` to trigger a classic CRT power-down sequence before closing the terminal:
+
+1. **Brightness spike** (0.0-0.25s) — Capacitor discharge, screen flashes white-green
+2. **Vertical collapse** (0.25-0.70s) — Screen squeezes to a horizontal line
+3. **Horizontal shrink** (0.70-1.10s) — Line collapses to a center dot
+4. **Phosphor afterglow** (1.10-1.60s) — Green dot fades with P1 phosphor color
+5. **Black** (1.60s+) — Terminal exits
+
+This works by exploiting Ghostty's shader hot-reload (1.2.0+) — the shell function swaps the active shader to `crt-shutdown.glsl`, waits for the animation, restores the original shader, then exits. In non-Ghostty terminals, `matrix-off` simply exits.
+
+To auto-trigger on every `exit`, set `MATRIX_SHUTDOWN_ON_EXIT=true` in `matrix.conf`.
+
+### Enhanced CRT Effects (crt-full only)
+
+When using the `crt-full.glsl` shader, four additional effects can be toggled via `matrix-config` (Custom > CRT Effects) or by editing the shader directly:
+
+| Effect | Description | Default |
+|--------|-------------|---------|
+| **Static Noise** | Film grain / signal noise | Off |
+| **Horizontal Jitter** | Per-scanline signal instability | Off |
+| **Interlacing** | Alternating field darkening (60Hz) | Off |
+| **Enhanced Halation** | Wide-spread bloom from internal glass reflections | Off |
+
+The **Full 1999 CRT** preset enables noise + interlacing automatically. Changes take effect in real-time via Ghostty's shader hot-reload.
+
+---
+
+## Shaders
+
+Located in `shaders/`. Switch via `matrix-config` (Custom > Shader) or edit `~/.config/ghostty/config` directly.
+
+| Shader | Description | Effect | CPU Usage |
+|--------|-------------|--------|-----------|
+| `crt-full.glsl` | Full 1999 CRT | Barrel distortion, scanlines, shadow mask, vignette, optional noise/jitter/interlace/halation | Medium |
+| `retro-crt.glsl` | Retro CRT (eras only) | Switchable phosphor (green/amber/white/color), softer defaults. Auto-selected by Terminal Eras | Medium |
+| `crt.glsl` | CRT Scanlines | Scanlines only, no curvature | Medium |
+| `bloom.glsl` | Phosphor Bloom (recommended) | Soft glow around bright text | Low |
+| `matrix-glow.glsl` | Matrix Glow | Subtle green glow, minimal | Low |
+| `crt-shutdown.glsl` | CRT Shutdown | Power-down animation (used internally by `matrix-off`) | Low |
+
+> **Note:** `retro-crt.glsl` and `crt-shutdown.glsl` are managed automatically — they are not listed in the shader picker. `retro-crt.glsl` is applied by the Terminal Eras system with the correct phosphor setting for each era. `crt-shutdown.glsl` is swapped in temporarily by `matrix-off`.
+
+To change shader manually:
+```bash
+# In ~/.config/ghostty/config
+custom-shader = ~/.config/ghostty/shaders/crt-full.glsl
+```
+
+To disable shaders:
+```bash
+# Comment out or remove the line
+# custom-shader = ...
+```
+
+---
+
+## Commands
+
+```bash
+matrix-config       # Interactive configuration TUI
+matrix              # Run full startup sequence
+matrix-demo         # Reset lock and re-trigger animation
+matrix-off          # CRT shutdown animation + exit
+matrix-era          # Launch current era boot sequence
+matrix-rain         # Endless katakana rain
+matrix-conway       # Conway's Game of Life
+matrix-mandelbrot   # Mandelbrot fractal zoom
+matrix-full         # All scenes in a loop
+matrix-custom       # Manual mode selector for cxxmatrix scenes
+```
+
+---
+
+## Configuration
+
+Run `matrix-config` to open the interactive TUI. It has three main sections:
+
+### Presets
+
+One-click setups (see [Presets](#presets) above).
+
+Press `e` from the presets screen to enter Terminal Eras.
+
+### Custom Settings
+
+Press `c` from the presets screen to access individual controls:
+
+| Category | Settings |
+|----------|----------|
+| **Shader** | Shader picker with descriptions for all 5 options |
+| **Animation** | Frequency, duration, sequence, banner message, typing speed, skip, diffuse, twinkle |
+| **Terminal** | Font thicken (phosphor), font size, background opacity, cursor style/blink, window padding |
+| **Header** | Show/hide header, quote, system info |
+| **Colors** | Custom primary/bright/dim ANSI colors |
+| **CRT Effects** | Static noise, horizontal jitter, interlacing, enhanced halation (crt-full only) |
+| **Shutdown** | CRT shutdown effect on/off, auto-trigger on exit |
+| **Fallback** | Use cmatrix as fallback, fallback duration |
+
+### Manual Configuration
+
+Edit the config files directly:
+
+```bash
+# Matrix animation/behavior settings
+nano ~/.config/ghostty/matrix.conf
+
+# Ghostty terminal settings (shader, font, colors)
+nano ~/.config/ghostty/config
+```
+
+---
+
+## All Settings Reference
+
+All settings live in `~/.config/ghostty/matrix.conf`. Every setting is configurable via `matrix-config`, or by editing the file directly.
+
+### Animation
 
 | Setting | Options | Default | Description |
 |---------|---------|---------|-------------|
-| `MATRIX_ERA` | era ID or empty | `""` | Current terminal era (empty = Matrix theme) |
-| `MATRIX_ERA_INTERACTIVE` | true, false | `false` | Launch interactive simulation on new terminal |
+| `MATRIX_ANIMATION_FREQUENCY` | daily, weekly, always, never | daily | How often to run the startup animation |
+| `MATRIX_ANIMATION_DURATION` | seconds | 8 | Duration of the matrix rain phase |
+| `MATRIX_FRAME_RATE` | integer | 60 | cxxmatrix animation frame rate (higher = smoother, more CPU) |
+| `MATRIX_SEQUENCE` | comma-separated | number,rain,banner | cxxmatrix scenes: number, rain, banner, conway, mandelbrot, rain-forever |
+| `MATRIX_BANNER_MESSAGE` | string | WAKE UP NEO | Text shown in the banner scene |
+| `MATRIX_DIFFUSE` | true, false | true | Background glow effect in animation |
+| `MATRIX_TWINKLE` | true, false | true | Brightness fluctuations in animation |
+| `MATRIX_ALLOW_SKIP` | true, false | true | Allow skipping animation with any keypress |
 
-Set via the TUI or directly in `~/.config/ghostty/matrix.conf`.
+### Text Sequence
+
+| Setting | Options | Default | Description |
+|---------|---------|---------|-------------|
+| `MATRIX_SHOW_TEXT_SEQUENCE` | true, false | true | Show "Wake up, Neo..." after animation |
+| `MATRIX_TYPING_SPEED` | seconds | 0.06 | Delay per character in the typing effect (lower = faster) |
+
+### Header
+
+| Setting | Options | Default | Description |
+|---------|---------|---------|-------------|
+| `MATRIX_SHOW_HEADER` | true, false | true | Show header on subsequent terminal windows |
+| `MATRIX_SHOW_QUOTE` | true, false | true | Show random Matrix quote |
+| `MATRIX_SHOW_SYSTEM_INFO` | true, false | true | Show operator/node/shell/kernel info |
+| `MATRIX_CUSTOM_QUOTES` | pipe-separated | "" | Your own quotes (e.g. `"Quote one\|Quote two"`) |
+
+### Colors
+
+| Setting | Options | Default | Description |
+|---------|---------|---------|-------------|
+| `MATRIX_CUSTOM_COLORS` | true, false | false | Enable custom ANSI color overrides |
+| `MATRIX_COLOR_PRIMARY` | ANSI code | 0;32m | Primary text color (used when custom colors enabled) |
+| `MATRIX_COLOR_BRIGHT` | ANSI code | 1;32m | Bright/bold text color |
+| `MATRIX_COLOR_DIM` | ANSI code | 2;32m | Dim text color |
+
+### Fallback
+
+| Setting | Options | Default | Description |
+|---------|---------|---------|-------------|
+| `MATRIX_USE_FALLBACK` | true, false | true | Use cmatrix if cxxmatrix is not installed |
+| `MATRIX_FALLBACK_DURATION` | seconds | 5 | Duration of fallback animation |
+
+### CRT Shutdown
+
+| Setting | Options | Default | Description |
+|---------|---------|---------|-------------|
+| `MATRIX_SHUTDOWN_ANIMATION` | true, false | true | CRT power-down effect on `matrix-off` |
+| `MATRIX_SHUTDOWN_ON_EXIT` | true, false | false | Auto-trigger shutdown animation on `exit` |
+
+### Enhanced CRT Effects (crt-full shader only)
+
+| Setting | Options | Default | Description |
+|---------|---------|---------|-------------|
+| `MATRIX_CRT_NOISE` | true, false | false | Static noise / film grain |
+| `MATRIX_CRT_JITTER` | true, false | false | Horizontal jitter / signal instability |
+| `MATRIX_CRT_INTERLACE` | true, false | false | Alternating field interlacing |
+| `MATRIX_CRT_HALATION` | true, false | false | Wide-spread bloom from glass reflections |
+
+### Terminal Eras
+
+| Setting | Options | Default | Description |
+|---------|---------|---------|-------------|
+| `MATRIX_ERA` | era ID or empty | "" | Current terminal era (empty = Matrix theme) |
+| `MATRIX_ERA_INTERACTIVE` | true, false | false | Launch interactive simulation on new terminal |
+
+---
 
 ## File Structure
 
 ```
 ~/.config/ghostty/
-├── config                # Ghostty terminal config
-├── matrix.conf           # Matrix theme settings
-├── matrix-config.sh      # Interactive configuration TUI
-├── matrix-startup.sh     # Full animation script
-├── matrix-header.sh      # Header-only script
-├── shaders/
-│   ├── crt-full.glsl     # Full 1999 CRT (curvature + mask + optional effects)
-│   ├── retro-crt.glsl    # Configurable CRT (green/amber/white phosphor)
-│   ├── crt-shutdown.glsl # CRT power-down animation
-│   ├── crt.glsl          # CRT scanlines only
-│   ├── bloom.glsl        # Phosphor bloom (default)
-│   └── matrix-glow.glsl  # Subtle green glow
-└── eras/
-    ├── era-lib.sh        # Shared library
-    ├── era-boot.sh       # Era boot sequence display
-    ├── era-punchcard.sh  # IBM 029 keypunch simulator
-    ├── era-enigma.sh     # Enigma M3 rotor machine
-    ├── era-frontpanel.sh # Altair/PDP-8 front panel
-    ├── era-basic.sh      # Universal BASIC interpreter
-    ├── era-dos.sh        # DOS prompt simulator
-    ├── era-bbs.sh        # BBS terminal
-    ├── era-teletype.sh   # ASR-33 teletype
-    ├── era-3270.sh       # IBM 3270 block mode
-    └── era-unix.sh       # Classic Unix shells
++-- config                # Ghostty terminal config
++-- matrix.conf           # Matrix theme settings (28 settings)
++-- matrix-config.sh      # Interactive configuration TUI
++-- matrix-startup.sh     # Full animation script
++-- matrix-header.sh      # Header-only script
++-- shaders/
+|   +-- crt-full.glsl     # Full 1999 CRT (curvature + mask + optional effects)
+|   +-- retro-crt.glsl    # Configurable CRT (green/amber/white phosphor, era-managed)
+|   +-- crt-shutdown.glsl # CRT power-down animation
+|   +-- crt.glsl          # CRT scanlines only
+|   +-- bloom.glsl        # Phosphor bloom (default)
+|   +-- matrix-glow.glsl  # Subtle green glow
++-- eras/
+    +-- era-lib.sh        # Shared library
+    +-- era-boot.sh       # Era boot sequence display
+    +-- era-punchcard.sh  # IBM 029 keypunch simulator
+    +-- era-enigma.sh     # Enigma M3 rotor machine
+    +-- era-frontpanel.sh # Altair/PDP-8/IMSAI front panel
+    +-- era-basic.sh      # Universal BASIC interpreter (9 systems)
+    +-- era-dos.sh        # DOS prompt simulator (3 variants)
+    +-- era-bbs.sh        # BBS terminal
+    +-- era-teletype.sh   # ASR-33 teletype
+    +-- era-3270.sh       # IBM 3270 block mode
+    +-- era-unix.sh       # Classic Unix shells (7 variants)
 
 ~/.local/bin/
-├── cxxmatrix             # Matrix rain binary
-└── matrix-config         # Symlink to config TUI
++-- cxxmatrix             # Matrix rain binary
++-- matrix-config         # Symlink to config TUI
 ```
+
+---
 
 ## Manual Installation
 
@@ -601,6 +669,8 @@ sudo apt install cmatrix
 ./install.sh
 ```
 
+---
+
 ## Troubleshooting
 
 ### Animation not running?
@@ -639,9 +709,13 @@ which gawk
 # If missing: brew install gawk / sudo apt install gawk
 ```
 
-## Documentation
+---
 
-- **[HISTORY.md](HISTORY.md)** — Comprehensive history of every terminal era, the Matrix philosophy, CRT technology, and the cultural context of 55 years of computing
+## Further Reading
+
+**[HISTORY.md](HISTORY.md)** — The story behind the eras: 55 years of terminal history from vacuum tubes to VGA, the philosophy of the Matrix as it relates to computing, and why every era matters. If you want to understand *why* your VT100 has green phosphor or *how* Hollerith encoding works, start here.
+
+---
 
 ## Credits & Acknowledgments
 
@@ -676,6 +750,8 @@ This project builds upon and is inspired by the following open source projects:
 - **The Matrix (1999)** - Warner Bros.
   - The iconic visual aesthetic and quotes
   - "Follow the white rabbit."
+
+---
 
 ## License
 
