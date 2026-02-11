@@ -46,7 +46,7 @@ if [ -f ~/.config/ghostty/config ]; then
     echo -e "${YELLOW}Existing config backed up to: $_backup${NC}"
     echo -e "${YELLOW}Merging Matrix theme into existing config...${NC}"
     # Remove any existing Matrix theme lines before appending
-    grep -v -E '^(background|foreground|cursor-color|cursor-text|cursor-style|selection-background|selection-foreground|split-divider-color|bold-is-bright|font-thicken|custom-shader|custom-shader-animation|palette)\s*=' ~/.config/ghostty/config > ~/.config/ghostty/config.tmp || true
+    grep -v -E '^(background|foreground|cursor-color|cursor-text|cursor-style|selection-background|selection-foreground|split-divider-color|bold-is-bright|font-thicken|background-opacity|unfocused-split-opacity|unfocused-split-fill|custom-shader|custom-shader-animation|palette)\s*=' ~/.config/ghostty/config > ~/.config/ghostty/config.tmp || true
     # Remove old Matrix header comments if present
     grep -v -E '^\s*#.*(THE MATRIX|MATRIX SHADER|shades of the Matrix|Phosphor|phosphor|the pill|the code|system alerts|blue pill|agents|data streams|bright green|the blinking truth|seeing through the code|boundaries of reality)' ~/.config/ghostty/config.tmp > ~/.config/ghostty/config.tmp2 || true
     mv ~/.config/ghostty/config.tmp2 ~/.config/ghostty/config

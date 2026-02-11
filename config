@@ -59,6 +59,13 @@ bold-is-bright = true
 # Phosphor glow effect - thickens font strokes
 font-thicken = true
 
+# Seeing through the code - slight transparency
+background-opacity = 0.92
+
+# Unfocused splits fade into the darkness
+unfocused-split-opacity = 0.6
+unfocused-split-fill = #001100
+
 # ============================================
 # MATRIX SHADER - Phosphor bloom (recommended)
 # "The Matrix is everywhere. It is all around us."
