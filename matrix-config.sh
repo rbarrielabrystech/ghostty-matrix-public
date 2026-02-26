@@ -901,7 +901,10 @@ _hex_bg() {
     printf '\033[48;2;%d;%d;%dm' $r $g $b
 }
 
-# Full-screen preview of an era. Returns 0 if user wants to apply, 1 to go back.
+# Full interactive preview of an era. Returns 0 if user wants to apply, 1 to go back.
+# Runs the complete era experience (boot + interactive simulator) with ANSI colors,
+# without writing to Ghostty config. When the user exits the simulator, they get
+# an apply/back prompt.
 preview_era() {
     local era_id="$1"
     local colors
@@ -913,13 +916,14 @@ preview_era() {
     fg_esc=$(_hex_fg "$fg_hex")
     local reset='\033[0m'
 
-    # Fill entire screen with era colors
+    # Set era colors for the terminal
+    printf "${bg_esc}${fg_esc}"
+    clear
+
+    # Fill background with era colors
     local rows cols
     rows=$(tput lines)
     cols=$(tput cols)
-    printf "${bg_esc}${fg_esc}"
-    clear
-    # Fill background
     local blank=""
     printf -v blank "%*s" $cols ""
     local i=0
@@ -928,41 +932,51 @@ preview_era() {
         printf "%s" "$blank"
         i=$(( i + 1 ))
     done
+    tput cup 0 0
 
-    # Run the boot message by executing era-boot.sh and capturing output
-    tput cup 1 0
+    # Run the full era experience as a child process
+    # MATRIX_ERA_INTERACTIVE=true forces the interactive simulator to launch
     local eras_dir="${HOME}/.config/ghostty/eras"
     if [ -f "${eras_dir}/era-boot.sh" ]; then
-        # Run in subshell to capture boot text without slow_type delays
-        # We override slow_type to just print instantly for preview
-        local boot_output
-        boot_output=$(
-            # Override slow_type to print instantly
-            slow_type() { echo "$1"; }
-            export -f slow_type 2>/dev/null
-            # Extract and run just the boot function
-            eval "$(sed -n '/^boot_'"${era_id}"'()/,/^}/p' "${eras_dir}/era-boot.sh")"
-            "boot_${era_id}" 2>/dev/null
-        ) 2>/dev/null
-        if [ -n "$boot_output" ]; then
-            # Strip any embedded clear-screen sequences so they don't reset our colors
-            echo "$boot_output" | sed $'s/\x1b\\[H\x1b\\[2J\x1b\\[3J//g; s/\x1b\\[H\x1b\\[2J//g'
-        else
-            echo ""
-            echo "  $(era_display_name "$era_id")"
-            echo ""
-        fi
+        # Run era-boot.sh with the era ID and interactive mode forced on
+        # Export env var so era-boot.sh picks it up (overrides matrix.conf)
+        export MATRIX_ERA_INTERACTIVE=true
+        bash "${eras_dir}/era-boot.sh" "$era_id" 2>/dev/null
+        unset MATRIX_ERA_INTERACTIVE
     else
         echo ""
         echo "  $(era_display_name "$era_id")"
+        echo "  Era scripts not found."
         echo ""
     fi
 
-    # Draw sticky bottom bar
-    local bar_row=$(( rows - 2 ))
-    local bar_text="  PREVIEWING: $(era_display_name "$era_id")    [Enter] Apply    [Esc] Back"
-    tput cup $bar_row 0
-    printf "\033[7m${bg_esc}${fg_esc}%-*s\033[0m${bg_esc}${fg_esc}" $cols "$bar_text"
+    # User has exited the simulator — show apply/back prompt
+    printf "${reset}"
+    printf "${bg_esc}${fg_esc}"
+
+    # Redraw background
+    rows=$(tput lines)
+    cols=$(tput cols)
+    i=0
+    while [ $i -lt $rows ]; do
+        tput cup $i 0
+        printf "%s" "$blank"
+        i=$(( i + 1 ))
+    done
+
+    # Center the prompt
+    local mid_row=$(( rows / 2 - 2 ))
+    local era_name
+    era_name=$(era_display_name "$era_id")
+
+    tput cup $mid_row 0
+    printf "%*s" $(( (cols - ${#era_name}) / 2 )) ""
+    printf "\033[1m%s\033[22m\n" "$era_name"
+    echo ""
+    local prompt1="  [Enter] Apply this era to your terminal"
+    local prompt2="  [Esc/x] Back to browser (no changes)"
+    printf "%*s%s\n" $(( (cols - ${#prompt1}) / 2 )) "" "$prompt1"
+    printf "%*s%s\n" $(( (cols - ${#prompt2}) / 2 )) "" "$prompt2"
 
     # Wait for user decision
     while true; do
@@ -979,7 +993,7 @@ preview_era() {
                 read -rsn1 -t 1 _pc1
                 if [ -n "$_pc1" ]; then
                     read -rsn1 -t 1 _pc2
-                    # Ignore arrow keys in preview, just consume
+                    # Consume arrow keys, ignore
                 else
                     # Plain Esc — go back
                     printf "${reset}"

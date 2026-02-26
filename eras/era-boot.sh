@@ -9,7 +9,8 @@ ERA="${1:-$(era_name)}"
 [ -z "$ERA" ] && exit 0
 
 ERAS_DIR="$(dirname "$0")"
-INTERACTIVE=$(read_matrix_conf "MATRIX_ERA_INTERACTIVE" "false")
+# Allow env override for preview mode (matrix-config passes MATRIX_ERA_INTERACTIVE=true)
+INTERACTIVE="${MATRIX_ERA_INTERACTIVE:-$(read_matrix_conf "MATRIX_ERA_INTERACTIVE" "false")}"
 
 # --- Boot messages for each era ---
 
