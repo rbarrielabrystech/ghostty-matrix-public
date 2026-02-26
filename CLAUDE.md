@@ -1,6 +1,6 @@
-# Ghostty Matrix Theme
+# Ghostty Terminal Time Machine
 
-A Matrix-inspired terminal theme for Ghostty with authentic 1999 aesthetics.
+30 interactive computing eras for Ghostty — from WWII Enigma machines to Windows 98, with the Matrix (1999) as home base.
 
 **Cross-platform:** Linux, macOS, Windows (WSL/Git Bash)
 

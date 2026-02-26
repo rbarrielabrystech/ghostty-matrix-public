@@ -1,5 +1,5 @@
 #!/bin/bash
-# Matrix Interactive Configuration
+# Ghostty Terminal Time Machine - Interactive Configuration
 # "There is no spoon." - Spoon Boy
 # Cross-platform: Linux, macOS, Windows (WSL/Git Bash)
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Matrix Ghostty Setup - Cross-Platform Installation Script
+# Ghostty Terminal Time Machine - Cross-Platform Installation Script
 # "There is no spoon."
 # Supports: Linux, macOS, Windows (WSL/Git Bash)
 
@@ -33,7 +33,7 @@ detect_os() {
 
 OS_TYPE=$(detect_os)
 echo -e "${GREEN}Detected OS: ${OS_TYPE}${NC}"
-echo -e "${GREEN}Installing Matrix Ghostty Configuration...${NC}"
+echo -e "${GREEN}Installing Ghostty Terminal Time Machine...${NC}"
 
 # Create directories (works on all platforms)
 mkdir -p ~/.config/ghostty/shaders

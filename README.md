@@ -1,6 +1,6 @@
-# Matrix Ghostty Theme
+# Ghostty Terminal Time Machine
 
-A terminal time machine for [Ghostty](https://ghostty.org/) — from WWII Enigma machines to Windows 98, with an authentic Matrix (1999) aesthetic as home base.
+A terminal time machine for [Ghostty](https://ghostty.org/) — 30 interactive computing eras from WWII Enigma machines to Windows 98, with an authentic Matrix (1999) aesthetic as home base.
 
 ![Matrix Theme Demo](https://raw.githubusercontent.com/rbarrielabrystech/ghostty-matrix-public/main/demo.gif)
 
@@ -75,18 +75,32 @@ Four things change simultaneously:
 ```bash
 matrix-config          # Open the TUI
                        # Press 'e' for Terminal Eras
-                       # Select a category (1-9)
-                       # Pick an era
-                       # Press 'i' to toggle interactive mode
+                       # Use ↑/↓ arrow keys to browse all 30 eras
+                       # Press 'p' to preview (full interactive experience)
+                       # Press Enter to apply
 ```
+
+### Era Browser
+
+The era browser is a single scrollable list with all 30 eras organized by category. Key controls:
+
+| Key | Action |
+|-----|--------|
+| `↑`/`↓` or `j`/`k` | Navigate between eras |
+| `p` | **Preview** — launches the full era experience (boot sequence + interactive simulator) without applying. Press Enter to apply after preview, or Esc to go back |
+| `Enter` | Apply the selected era to your terminal |
+| `/` | Search — type to filter eras by name, Esc to clear |
+| `i` | Toggle interactive mode on/off |
+| `m` | Return to the default Matrix theme |
+| `Esc` or `x` | Back to the presets menu |
+
+The browser includes a proportional scrollbar and a detail panel showing what each era changes (palette, shader).
 
 Or launch the current era's boot sequence directly:
 
 ```bash
 matrix-era             # Show current era's boot message
 ```
-
-To return to the default Matrix theme, press `m` in the Terminal Eras menu.
 
 ### All 30 Eras
 
@@ -468,7 +482,7 @@ Press `c` from the presets screen to access individual controls:
 |----------|----------|
 | **Shader** | Shader picker with descriptions for all 5 options |
 | **Animation** | Frequency, duration, sequence, banner message, typing speed, skip, diffuse, twinkle |
-| **Terminal** | Font thicken (phosphor), font size, background opacity, cursor style/blink, window padding |
+| **Terminal** | Font thicken (phosphor), font size, background opacity, cursor style/blink, window padding, scrollbar (Ghostty 1.3+) |
 | **Header** | Show/hide header, quote, system info |
 | **Colors** | Custom primary/bright/dim ANSI colors |
 | **CRT Effects** | Static noise, horizontal jitter, interlacing, enhanced halation (crt-full only) |
@@ -553,6 +567,13 @@ All settings live in `~/.config/ghostty/matrix.conf`. Every setting is configura
 | `MATRIX_CRT_JITTER` | true, false | false | Horizontal jitter / signal instability |
 | `MATRIX_CRT_INTERLACE` | true, false | false | Alternating field interlacing |
 | `MATRIX_CRT_HALATION` | true, false | false | Wide-spread bloom from glass reflections |
+
+### Terminal Eras
+
+| Setting | Options | Default | Description |
+|---------|---------|---------|-------------|
+| `MATRIX_ERA` | era ID or empty | "" | Current terminal era (empty = Matrix theme) |
+| `MATRIX_ERA_INTERACTIVE` | true, false | false | Launch interactive simulation on new terminal |
 
 ### Terminal Eras
 
