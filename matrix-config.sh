@@ -1586,6 +1586,8 @@ screen_custom() {
     box_kv "d) Cursor Style" "[$cursor]"
     box_kv "e) Cursor Blink" "[$(on_off $blink)]"
     box_kv "f) Window Padding" "[${pad_x}x${pad_y}]"
+    local scrollbar=$(read_ghostty_conf "scrollbar" "never")
+    box_kv "o) Scrollbar" "[$scrollbar]"
     box_empty
 
     # -- HEADER --
@@ -1880,6 +1882,16 @@ while true; do
                 write_ghostty_conf "window-padding-x" "$new_x"
                 write_ghostty_conf "window-padding-y" "$new_y"
                 STATUS_MSG="Padding: ${new_x}x${new_y} -- restart Ghostty"
+                ;;
+            o|O)
+                cur=$(read_ghostty_conf "scrollbar" "never")
+                if [ "$cur" = "system" ]; then
+                    write_ghostty_conf "scrollbar" "never"
+                    STATUS_MSG="Scrollbar: never -- restart Ghostty"
+                else
+                    write_ghostty_conf "scrollbar" "system"
+                    STATUS_MSG="Scrollbar: system -- restart Ghostty"
+                fi
                 ;;
             g|G)
                 cur=$(read_matrix_conf "MATRIX_SHOW_HEADER" "true")
