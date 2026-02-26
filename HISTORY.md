@@ -1254,6 +1254,6 @@ Our terminal eras can't reproduce sound through a terminal emulator, but the vis
 
 ---
 
-**This document is part of the [Ghostty Matrix Theme](https://github.com/rbarrielabrystech/ghostty-matrix-public) project.**
+**This document is part of the [Ghostty Terminal Time Machine](https://github.com/rbarrielabrystech/ghostty-time-machine) project.**
 
 **Use `matrix-config` → Terminal Eras to experience these machines yourself.**

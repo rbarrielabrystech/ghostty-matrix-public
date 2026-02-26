@@ -2,7 +2,7 @@
 
 A terminal time machine for [Ghostty](https://ghostty.org/) — 30 interactive computing eras from WWII Enigma machines to Windows 98, with an authentic Matrix (1999) aesthetic as home base.
 
-![Matrix Theme Demo](https://raw.githubusercontent.com/rbarrielabrystech/ghostty-matrix-public/main/demo.gif)
+![Matrix Theme Demo](https://raw.githubusercontent.com/rbarrielabrystech/ghostty-time-machine/main/demo.gif)
 
 [Watch full demo on YouTube](https://www.youtube.com/watch?v=BE-xdpNpspE)
 
@@ -29,8 +29,8 @@ A terminal time machine for [Ghostty](https://ghostty.org/) — 30 interactive c
 ## Quick Install
 
 ```bash
-git clone https://github.com/rbarrielabrystech/ghostty-matrix-public.git
-cd ghostty-matrix-public
+git clone https://github.com/rbarrielabrystech/ghostty-time-machine.git
+cd ghostty-time-machine
 chmod +x install.sh
 ./install.sh
 ```
