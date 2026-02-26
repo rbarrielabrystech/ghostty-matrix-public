@@ -849,6 +849,154 @@ era_display_name() {
 }
 
 # ============================================================
+# ERA PREVIEW
+# ============================================================
+
+# Returns "bg_hex|fg_hex" for a given era (hex without #)
+_era_colors() {
+    case "$1" in
+        enigma)      echo "1A1A0E|FFE4B5" ;;
+        colossus)    echo "0A0A0A|FF6B35" ;;
+        punchcard)   echo "F5F0E1|1A1A1A" ;;
+        teletype)    echo "F5F5DC|1A1A1A" ;;
+        lineprinter) echo "F5F5F5|1A1A1A" ;;
+        ibm3270)     echo "0A0A0A|33FF33" ;;
+        system360)   echo "3A3A3A|FF3300" ;;
+        pdp8)        echo "8B7355|FFAA00" ;;
+        vt100)       echo "0A0A0A|00FF00" ;;
+        vt220)       echo "0A0A0A|FFB000" ;;
+        altair)      echo "1A1A3A|FF0000" ;;
+        apple2)      echo "0A0A0A|33FF33" ;;
+        pet)         echo "0A0A0A|33FF33" ;;
+        trs80)       echo "0A0A0A|FFFFFF" ;;
+        c64)         echo "3A3AB5|6C6CFF" ;;
+        spectrum)    echo "D7D7D7|000000" ;;
+        bbc)         echo "0A0A0A|FFFFFF" ;;
+        amstrad)     echo "00006B|FFFF00" ;;
+        msx)         echo "0000AA|FFFFFF" ;;
+        atari800)    echo "3A5AAA|80AAFF" ;;
+        amiga)       echo "0055AA|FF8800" ;;
+        ibmmda)      echo "0A0A0A|00FF00" ;;
+        ibmcga)      echo "000000|AAAAAA" ;;
+        dos)         echo "000000|AAAAAA" ;;
+        solaris)     echo "2B2B5E|00CCCC" ;;
+        irix)        echo "1A1A4A|3399FF" ;;
+        next)        echo "2A2A2A|FFFFFF" ;;
+        bbs)         echo "000000|AAAAAA" ;;
+        linux)       echo "000000|AAAAAA" ;;
+        win98)       echo "000000|AAAAAA" ;;
+        *)           echo "0D0208|00FF41" ;;
+    esac
+}
+
+# Convert hex "RRGGBB" to ANSI true-color escape for foreground
+_hex_fg() {
+    local r=$((16#${1:0:2})) g=$((16#${1:2:2})) b=$((16#${1:4:2}))
+    printf '\033[38;2;%d;%d;%dm' $r $g $b
+}
+
+# Convert hex "RRGGBB" to ANSI true-color escape for background
+_hex_bg() {
+    local r=$((16#${1:0:2})) g=$((16#${1:2:2})) b=$((16#${1:4:2}))
+    printf '\033[48;2;%d;%d;%dm' $r $g $b
+}
+
+# Full-screen preview of an era. Returns 0 if user wants to apply, 1 to go back.
+preview_era() {
+    local era_id="$1"
+    local colors
+    colors=$(_era_colors "$era_id")
+    local bg_hex="${colors%%|*}"
+    local fg_hex="${colors##*|}"
+    local bg_esc fg_esc
+    bg_esc=$(_hex_bg "$bg_hex")
+    fg_esc=$(_hex_fg "$fg_hex")
+    local reset='\033[0m'
+
+    # Fill entire screen with era colors
+    local rows cols
+    rows=$(tput lines)
+    cols=$(tput cols)
+    printf "${bg_esc}${fg_esc}"
+    clear
+    # Fill background
+    local blank=""
+    printf -v blank "%*s" $cols ""
+    local i=0
+    while [ $i -lt $rows ]; do
+        tput cup $i 0
+        printf "%s" "$blank"
+        i=$(( i + 1 ))
+    done
+
+    # Run the boot message by executing era-boot.sh and capturing output
+    tput cup 1 0
+    local eras_dir="${HOME}/.config/ghostty/eras"
+    if [ -f "${eras_dir}/era-boot.sh" ]; then
+        # Run in subshell to capture boot text without slow_type delays
+        # We override slow_type to just print instantly for preview
+        local boot_output
+        boot_output=$(
+            # Override slow_type to print instantly
+            slow_type() { echo "$1"; }
+            export -f slow_type 2>/dev/null
+            # Extract and run just the boot function
+            eval "$(sed -n '/^boot_'"${era_id}"'()/,/^}/p' "${eras_dir}/era-boot.sh")"
+            "boot_${era_id}" 2>/dev/null
+        ) 2>/dev/null
+        if [ -n "$boot_output" ]; then
+            # Strip any embedded clear-screen sequences so they don't reset our colors
+            echo "$boot_output" | sed $'s/\x1b\\[H\x1b\\[2J\x1b\\[3J//g; s/\x1b\\[H\x1b\\[2J//g'
+        else
+            echo ""
+            echo "  $(era_display_name "$era_id")"
+            echo ""
+        fi
+    else
+        echo ""
+        echo "  $(era_display_name "$era_id")"
+        echo ""
+    fi
+
+    # Draw sticky bottom bar
+    local bar_row=$(( rows - 2 ))
+    local bar_text="  PREVIEWING: $(era_display_name "$era_id")    [Enter] Apply    [Esc] Back"
+    tput cup $bar_row 0
+    printf "\033[7m${bg_esc}${fg_esc}%-*s\033[0m${bg_esc}${fg_esc}" $cols "$bar_text"
+
+    # Wait for user decision
+    while true; do
+        local pkey=""
+        read -rsn1 pkey
+        case "$pkey" in
+            ''|$'\r'|$'\n')
+                printf "${reset}"
+                clear
+                return 0  # apply
+                ;;
+            $'\x1b')
+                local _pc1="" _pc2=""
+                read -rsn1 -t 1 _pc1
+                if [ -n "$_pc1" ]; then
+                    read -rsn1 -t 1 _pc2
+                    # Ignore arrow keys in preview, just consume
+                else
+                    # Plain Esc — go back
+                    printf "${reset}"
+                    clear
+                    return 1
+                fi
+                ;;
+            x|X|q|Q)
+                printf "${reset}"
+                clear
+                return 1
+                ;;
+        esac
+    done
+}
+
+# ============================================================
 # SCREENS
 # ============================================================
 
@@ -1295,7 +1443,7 @@ screen_era_browser() {
         if [ $search_mode -eq 1 ]; then
             box_kv "Search: ${search_str}_" "" "$CYAN" "$NC"
         else
-            box_kv "[↑/↓] Navigate  [Enter] Apply  [i] Interactive ${interactive_label}" "" "$DIM" "$BRIGHT"
+            box_kv "[↑/↓] Navigate  [p] Preview  [Enter] Apply  [i] ${interactive_label}" "" "$DIM" "$BRIGHT"
         fi
         box_kv "[m] Matrix  [/] Search  [Esc] Back" "" "$DIM" "$NC"
         box_sep
@@ -1347,7 +1495,7 @@ screen_era_browser() {
             local search_display="Search: ${search_str}_"
             printf "${DIM}║${NC}${CYAN}  %-*s${NC}${DIM}║${NC}" $(( inner - 2 )) "$search_display"
         else
-            local help1="[↑/↓] Navigate  [Enter] Apply  [i] Interactive ${interactive_label}"
+            local help1="[↑/↓] Navigate  [p] Preview  [Enter] Apply  [i] ${interactive_label}"
             printf "${DIM}║${NC}${DIM}  %-*s${NC}${DIM}║${NC}" $(( inner - 2 )) "$help1"
         fi
     }
@@ -1414,7 +1562,7 @@ screen_era_browser() {
                         _redraw_list
                     fi
                     ;;
-                $'\r'|$'\n')
+                ''|$'\r'|$'\n')
                     # Enter in search: apply selected era
                     if [ $total_nav -gt 0 ]; then
                         local sel_entry="${ERA_LIST[${nav_indices[$cursor]}]}"
@@ -1497,13 +1645,26 @@ screen_era_browser() {
                     _redraw_list
                 fi
                 ;;
-            $'\r'|$'\n')
+            ''|$'\r'|$'\n')
                 if [ $total_nav -gt 0 ]; then
                     local sel_entry="${ERA_LIST[${nav_indices[$cursor]}]}"
                     local sel_id
                     sel_id=$(_era_field "$sel_entry" 1)
                     apply_era "$sel_id"
                     current_era="$sel_id"
+                    _draw_browser_full
+                fi
+                ;;
+            p|P)
+                if [ $total_nav -gt 0 ]; then
+                    local sel_entry="${ERA_LIST[${nav_indices[$cursor]}]}"
+                    local sel_id
+                    sel_id=$(_era_field "$sel_entry" 1)
+                    if preview_era "$sel_id"; then
+                        # User pressed Enter in preview — apply
+                        apply_era "$sel_id"
+                        current_era="$sel_id"
+                    fi
                     _draw_browser_full
                 fi
                 ;;
