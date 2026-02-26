@@ -1375,7 +1375,10 @@ screen_era_browser() {
             case "$key" in
                 $'\x1b')
                     # Could be escape or arrow — peek for bracket
-                    read -rsn2 -t 0.05 key2
+                    local _c1="" _c2=""
+                    read -rsn1 -t 1 _c1
+                    read -rsn1 -t 1 _c2
+                    key2="${_c1}${_c2}"
                     if [ -z "$key2" ]; then
                         # Plain Esc: exit search mode, clear filter
                         search_mode=0
@@ -1452,7 +1455,10 @@ screen_era_browser() {
         # Normal (non-search) mode
         case "$key" in
             $'\x1b')
-                read -rsn2 -t 0.05 key2
+                local _c1="" _c2=""
+                read -rsn1 -t 1 _c1
+                read -rsn1 -t 1 _c2
+                key2="${_c1}${_c2}"
                 if [ -z "$key2" ]; then
                     # Plain Esc — go back to presets
                     current_screen="presets"
