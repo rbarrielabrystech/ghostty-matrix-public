@@ -910,202 +910,621 @@ screen_presets() {
     printf "  ${GREEN}> ${NC}"
 }
 
-# ---- TERMINAL ERAS SCREEN (category selection) ----
-screen_eras() {
-    clear
-    local current_era=$(read_matrix_conf "MATRIX_ERA" "")
-    local interactive=$(read_matrix_conf "MATRIX_ERA_INTERACTIVE" "false")
+# ---- TERMINAL ERAS BROWSER (single-screen interactive) ----
+screen_era_browser() {
+    # ----------------------------------------------------------
+    # Data: all eras + category headers as a flat indexed array.
+    # Format: "CAT|Header Text"  or  "era_id|Display Name|short desc|detail line"
+    # ----------------------------------------------------------
+    local ERA_LIST
+    ERA_LIST=(
+        "CAT|WWII Computing (1940s)"
+        "enigma|Enigma Machine|Rotor encryption simulator|Palette: warm sepia, No shader"
+        "colossus|Colossus|Codebreaking computer|Palette: amber/orange, No shader"
+        "CAT|Pre-CRT Era (1950s-1960s)"
+        "punchcard|IBM Punch Card|Keypunch + card reader|Palette: paper white, No shader"
+        "teletype|Teletype ASR-33|10 chars/sec paper terminal|Palette: cream/beige, No shader"
+        "lineprinter|Line Printer|Greenbar output|Palette: white paper, No shader"
+        "CAT|Mainframes (1960s-1970s)"
+        "ibm3270|IBM 3270|Block-mode terminal|Palette: green phosphor, Shader: retro-crt green"
+        "system360|IBM System/360|Mainframe console|Palette: red-on-gray, No shader"
+        "pdp8|DEC PDP-8|Front panel minicomputer|Palette: amber/brown, No shader"
+        "CAT|Early Terminals (1970s)"
+        "vt100|DEC VT100|Green phosphor terminal|Palette: green phosphor, Shader: retro-crt green"
+        "vt220|DEC VT220|Amber phosphor terminal|Palette: amber phosphor, Shader: retro-crt amber"
+        "altair|Altair 8800|Front panel computer|Palette: red-on-blue, No shader"
+        "CAT|Home Computers (1977-1985)"
+        "apple2|Apple II|Green phosphor, Applesoft BASIC|Palette: green phosphor, Shader: retro-crt green"
+        "pet|Commodore PET|Green CRT, Commodore BASIC|Palette: green phosphor, Shader: retro-crt green"
+        "trs80|TRS-80|White phosphor, Level II BASIC|Palette: white phosphor, Shader: retro-crt white"
+        "c64|Commodore 64|Blue-on-blue, BASIC V2|Palette: C64 blue, Shader: retro-crt"
+        "spectrum|ZX Spectrum|Keyword entry, Sinclair BASIC|Palette: Spectrum colors, Shader: retro-crt"
+        "bbc|BBC Micro|White-on-black, BBC BASIC|Palette: white-on-black, Shader: retro-crt"
+        "amstrad|Amstrad CPC|Yellow-on-blue, Locomotive BASIC|Palette: yellow-on-blue, Shader: retro-crt"
+        "msx|MSX|White-on-blue, MSX-BASIC|Palette: MSX standard, Shader: retro-crt"
+        "atari800|Atari 800|Atari BASIC|Palette: Atari colors, Shader: retro-crt"
+        "amiga|Commodore Amiga|AmigaDOS Workbench|Palette: Amiga colors, Shader: retro-crt"
+        "CAT|IBM PC Era (1981-1995)"
+        "ibmmda|IBM MDA|Green phosphor, DOS 3.30|Palette: green phosphor, Shader: retro-crt green"
+        "ibmcga|IBM CGA|Color graphics adapter|Palette: CGA standard, Shader: retro-crt"
+        "dos|MS-DOS / VGA|DOS 6.22, VGA display|Palette: DOS gray, Shader: retro-crt"
+        "CAT|Professional Unix (1985-1998)"
+        "solaris|Sun Solaris|SunOS 5.6 workstation|Palette: navy-on-blue, Shader: retro-crt"
+        "irix|SGI IRIX|Silicon Graphics workstation|Palette: indigo-blue, Shader: retro-crt"
+        "next|NeXT|NeXTSTEP grayscale|Palette: gray/white, Shader: bloom"
+        "CAT|BBS & Online (1985-1997)"
+        "bbs|BBS Terminal|Dial-up with ANSI art & door games|Palette: DOS gray, Shader: retro-crt"
+        "CAT|Modern (1995-2000)"
+        "linux|Early Linux|Slackware, LILO, kernel 2.0|Palette: gray/white, No shader"
+        "win98|Windows 98|DOS prompt under Windows|Palette: win98 gray, No shader"
+    )
 
-    echo ""
-    box_top
-    box_center "[ TERMINAL ERAS - TIME MACHINE ]" "$BRIGHT"
-    box_center "\"Choose your decade.\"" "$DIM"
-    if [ -n "$current_era" ]; then
-        box_center "Current: $(era_display_name "$current_era")" "$CYAN"
-    fi
-    box_sep
-    box_empty
-    box_kv "1) WWII Computing" "1940s" "$BRIGHT" "$DIM"
-    box_left "   Enigma, Colossus" "$DIM"
-    box_empty
-    box_kv "2) Pre-CRT Era" "1950s-1960s" "$BRIGHT" "$DIM"
-    box_left "   Punch cards, teletypes, line printers" "$DIM"
-    box_empty
-    box_kv "3) Mainframes" "1960s-1970s" "$BRIGHT" "$DIM"
-    box_left "   IBM 3270, System/360, PDP-8" "$DIM"
-    box_empty
-    box_kv "4) Early Terminals" "1970s" "$BRIGHT" "$DIM"
-    box_left "   VT100, VT220, Altair 8800" "$DIM"
-    box_empty
-    box_kv "5) Home Computers" "1977-1985" "$BRIGHT" "$DIM"
-    box_left "   Apple II, C64, Spectrum, BBC, and more" "$DIM"
-    box_empty
-    box_kv "6) IBM PC Era" "1981-1995" "$BRIGHT" "$DIM"
-    box_left "   MDA, CGA, MS-DOS" "$DIM"
-    box_empty
-    box_kv "7) Professional Unix" "1985-1998" "$BRIGHT" "$DIM"
-    box_left "   Solaris, IRIX, NeXT" "$DIM"
-    box_empty
-    box_kv "8) BBS & Online" "1985-1997" "$BRIGHT" "$DIM"
-    box_left "   Dial-up BBS with ANSI art" "$DIM"
-    box_empty
-    box_kv "9) Modern" "1995-2000" "$BRIGHT" "$DIM"
-    box_left "   Early Linux, Windows 98" "$DIM"
-    box_empty
-    box_thin
-    box_kv "i) Interactive mode" "[$(on_off $interactive)]" "$GREEN" "$BRIGHT"
-    box_kv "m) Return to Matrix theme" "" "$GREEN" "$NC"
-    box_kv "x) Back to presets" "" "$GREEN" "$NC"
-    box_empty
+    local total_items=${#ERA_LIST[@]}
 
-    if [ -n "$STATUS_MSG" ]; then
+    # Build parallel arrays for navigation (era-only items, skipping CAT lines)
+    # nav_indices[i] = index into ERA_LIST for the i-th selectable era
+    local nav_indices=()
+    local ni=0
+    local idx=0
+    while [ $idx -lt $total_items ]; do
+        local entry="${ERA_LIST[$idx]}"
+        local entry_type="${entry%%|*}"
+        if [ "$entry_type" != "CAT" ]; then
+            nav_indices[$ni]=$idx
+            ni=$(( ni + 1 ))
+        fi
+        idx=$(( idx + 1 ))
+    done
+    local total_nav=${#nav_indices[@]}   # total selectable eras
+
+    # ---- State ----
+    local cursor=0          # index into nav_indices (which era is selected)
+    local scroll=0          # first visible row index into ERA_LIST
+    local VIEWPORT=15       # visible rows in the list area
+    local search_mode=0     # 1 when / search is active
+    local search_str=""     # current search filter string
+    local interactive
+    interactive=$(read_matrix_conf "MATRIX_ERA_INTERACTIVE" "false")
+    local current_era
+    current_era=$(read_matrix_conf "MATRIX_ERA" "")
+
+    # Helper: get field N (1-based) from a pipe-delimited string
+    _era_field() {
+        local str="$1" n="$2"
+        local i=1 part=""
+        local IFS="|"
+        for part in $str; do
+            [ $i -eq $n ] && { echo "$part"; return; }
+            i=$(( i + 1 ))
+        done
+        echo ""
+    }
+
+    # Helper: check if era entry matches search string (case-insensitive naive match)
+    _era_matches() {
+        local entry="$1" needle="$2"
+        [ -z "$needle" ] && { echo "1"; return; }
+        local lower_entry lower_needle
+        # Bash 3.2 compatible lower: use tr
+        lower_entry=$(echo "$entry" | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz')
+        lower_needle=$(echo "$needle" | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz')
+        case "$lower_entry" in
+            *"$lower_needle"*) echo "1" ;;
+            *) echo "0" ;;
+        esac
+    }
+
+    # Rebuild nav_indices filtering by search_str
+    _rebuild_nav() {
+        nav_indices=()
+        ni=0
+        idx=0
+        while [ $idx -lt $total_items ]; do
+            local entry="${ERA_LIST[$idx]}"
+            local etype="${entry%%|*}"
+            if [ "$etype" != "CAT" ]; then
+                local match
+                match=$(_era_matches "$entry" "$search_str")
+                if [ "$match" = "1" ]; then
+                    nav_indices[$ni]=$idx
+                    ni=$(( ni + 1 ))
+                fi
+            fi
+            idx=$(( idx + 1 ))
+        done
+        total_nav=${#nav_indices[@]}
+        # clamp cursor
+        [ $total_nav -eq 0 ] && cursor=0
+        [ $cursor -ge $total_nav ] && cursor=$(( total_nav > 0 ? total_nav - 1 : 0 ))
+    }
+
+    # Ensure the selected cursor row is visible; adjust scroll if needed.
+    # We scroll over ERA_LIST rows, so we need to find the ERA_LIST index of
+    # the current cursor and make sure it falls in [scroll, scroll+VIEWPORT).
+    _ensure_visible() {
+        [ $total_nav -eq 0 ] && return
+        local era_row=${nav_indices[$cursor]}
+        if [ $era_row -lt $scroll ]; then
+            scroll=$era_row
+        elif [ $era_row -ge $(( scroll + VIEWPORT )) ]; then
+            scroll=$(( era_row - VIEWPORT + 1 ))
+        fi
+        # Clamp scroll to valid range
+        local max_scroll=$(( total_items - VIEWPORT ))
+        [ $max_scroll -lt 0 ] && max_scroll=0
+        [ $scroll -gt $max_scroll ] && scroll=$max_scroll
+        [ $scroll -lt 0 ] && scroll=0
+    }
+
+    # ---- Scrollbar helpers ----
+    # Returns the scrollbar character for a given viewport row (0-based).
+    # Sets global _SB_CHAR.
+    _scrollbar_char() {
+        local vrow="$1"
+        local rows=$VIEWPORT
+        local track=$(( rows - 2 ))   # rows between top arrow and bottom arrow
+
+        # If all content fits in the viewport, no thumb needed — show track
+        if [ $total_items -le $VIEWPORT ]; then
+            case $vrow in
+                0)              _SB_CHAR="▲" ;;
+                $(( rows-1 )))  _SB_CHAR="▼" ;;
+                *)              _SB_CHAR="│" ;;
+            esac
+            return
+        fi
+
+        # thumb_size in track rows (min 1)
+        local thumb_size=$(( VIEWPORT * track / total_items ))
+        [ $thumb_size -lt 1 ] && thumb_size=1
+
+        # thumb_start position within track (0-based)
+        local max_scroll=$(( total_items - VIEWPORT ))
+        local thumb_start=0
+        if [ $max_scroll -gt 0 ]; then
+            thumb_start=$(( scroll * (track - thumb_size) / max_scroll ))
+        fi
+        local thumb_end=$(( thumb_start + thumb_size - 1 ))
+
+        case $vrow in
+            0)             _SB_CHAR="▲" ;;
+            $(( rows-1 ))) _SB_CHAR="▼" ;;
+            *)
+                local track_row=$(( vrow - 1 ))
+                if [ $track_row -ge $thumb_start ] && [ $track_row -le $thumb_end ]; then
+                    _SB_CHAR="█"
+                else
+                    _SB_CHAR="│"
+                fi
+                ;;
+        esac
+    }
+
+    # ---- Render one list row at a specific terminal row offset from top of box ----
+    # Arguments: viewport_row (0-based within the list area)
+    # Uses: scroll, cursor, nav_indices, ERA_LIST, VIEWPORT
+    # terminal_row_base is set externally before calling
+    _render_list_row() {
+        local vrow="$1"
+        local list_idx=$(( scroll + vrow ))
+
+        # Scrollbar char for this row
+        _SB_CHAR="│"
+        _scrollbar_char $vrow
+
+        # Content area width: BOX_W-2 inner, minus 1 for scrollbar = BOX_W-3
+        # BOX_W=62 → inner=60 → content=59
+        local content_w=$(( BOX_W - 3 ))
+
+        local line_content=""
+        local line_color="$GREEN"
+        local is_selected=0
+
+        if [ $list_idx -lt $total_items ]; then
+            local entry="${ERA_LIST[$list_idx]}"
+            local etype="${entry%%|*}"
+
+            if [ "$etype" = "CAT" ]; then
+                # Category header
+                local cat_label
+                cat_label=$(_era_field "$entry" 2)
+                # Format: "── Label ──────────"
+                local prefix=" ── "
+                local suffix_space=$(( content_w - ${#prefix} - ${#cat_label} - 1 ))
+                [ $suffix_space -lt 2 ] && suffix_space=2
+                local dashes=""
+                local di=0
+                while [ $di -lt $suffix_space ]; do
+                    dashes="${dashes}─"
+                    di=$(( di + 1 ))
+                done
+                line_content="${prefix}${cat_label} ${dashes}"
+                line_color="$YELLOW"
+            else
+                # Era row — check if it's currently selected in nav
+                local era_id
+                era_id=$(_era_field "$entry" 1)
+                local name
+                name=$(_era_field "$entry" 2)
+                local desc
+                desc=$(_era_field "$entry" 3)
+
+                # Is this nav cursor?
+                if [ $total_nav -gt 0 ] && [ ${nav_indices[$cursor]} -eq $list_idx ]; then
+                    is_selected=1
+                fi
+
+                # Marker for active era
+                local marker="  "
+                [ "$era_id" = "$current_era" ] && marker="* "
+
+                # Format: "  [>] Name           desc"
+                # cursor indicator is 3 chars: "> " or "  "
+                local cursor_indicator="  "
+                [ $is_selected -eq 1 ] && cursor_indicator="> "
+
+                # Name column: left-aligned in 22 chars, desc fills the rest
+                local name_w=22
+                local desc_w=$(( content_w - ${#marker} - ${#cursor_indicator} - name_w - 1 ))
+                [ $desc_w -lt 0 ] && desc_w=0
+
+                # Truncate if needed
+                local name_trunc="$name"
+                if [ ${#name} -gt $name_w ]; then
+                    name_trunc="${name:0:$(( name_w - 1 ))}…"
+                fi
+                local desc_trunc="$desc"
+                if [ ${#desc} -gt $desc_w ]; then
+                    desc_trunc="${desc:0:$(( desc_w - 1 ))}…"
+                fi
+
+                # Pad name to name_w
+                local name_padded
+                printf -v name_padded "%-*s" $name_w "$name_trunc"
+                # Pad desc to desc_w
+                local desc_padded
+                printf -v desc_padded "%-*s" $desc_w "$desc_trunc"
+
+                line_content="${marker}${cursor_indicator}${name_padded} ${desc_padded}"
+            fi
+        fi
+        # Pad/truncate to content_w
+        local padded_content
+        printf -v padded_content "%-*s" $content_w "$line_content"
+        padded_content="${padded_content:0:$content_w}"
+
+        # Move cursor to the correct terminal row and render
+        local trow=$(( _BROWSER_LIST_TOP + vrow ))
+        tput cup $trow $_BROWSER_LEFT_COL
+
+        if [ $is_selected -eq 1 ]; then
+            printf "${DIM}║${NC}${INVERT}${line_color}%s${NC}${DIM}%s║${NC}" "$padded_content" "$_SB_CHAR"
+        elif [ "$line_color" = "$YELLOW" ]; then
+            printf "${DIM}║${NC}${YELLOW}%s${NC}${DIM}%s║${NC}" "$padded_content" "$_SB_CHAR"
+        else
+            printf "${DIM}║${NC}${GREEN}%s${NC}${DIM}%s║${NC}" "$padded_content" "$_SB_CHAR"
+        fi
+    }
+
+    # ---- Render the detail panel (2 lines at bottom of box) ----
+    _render_detail() {
+        local detail_line1="" detail_line2=""
+        if [ $total_nav -gt 0 ]; then
+            local entry="${ERA_LIST[${nav_indices[$cursor]}]}"
+            local era_id
+            era_id=$(_era_field "$entry" 1)
+            local name
+            name=$(_era_field "$entry" 2)
+            local detail
+            detail=$(_era_field "$entry" 4)
+            detail_line1="${name} — ${detail}"
+            detail_line2="Press Enter to apply this era"
+        else
+            detail_line1="No eras match your search."
+            detail_line2="Press Esc to clear the filter."
+        fi
+
+        local inner=$(( BOX_W - 2 ))
+
+        tput cup $_BROWSER_DETAIL1_ROW $_BROWSER_LEFT_COL
+        local d1_trunc="${detail_line1:0:$(( inner - 2 ))}"
+        printf "${DIM}║${NC}${CYAN}  %-*s${NC}${DIM}║${NC}" $(( inner - 2 )) "$d1_trunc"
+
+        tput cup $_BROWSER_DETAIL2_ROW $_BROWSER_LEFT_COL
+        local d2_trunc="${detail_line2:0:$(( inner - 2 ))}"
+        printf "${DIM}║${NC}${DIM}  %-*s${NC}${DIM}║${NC}" $(( inner - 2 )) "$d2_trunc"
+    }
+
+    # ---- Full screen draw ----
+    _draw_browser_full() {
+        COLS=$(get_cols)
+        _BROWSER_LEFT_COL=$(( (COLS - BOX_W) / 2 ))
+        [ $_BROWSER_LEFT_COL -lt 0 ] && _BROWSER_LEFT_COL=0
+
+        clear
+        echo ""  # blank line before box
+
+        # Calculate starting terminal row (after echo "")
+        # We use tput lines for terminal height; the box starts at row 1 (0-indexed after clear+echo)
+        _BROWSER_BOX_TOP=1
+
+        # Render the static chrome (header, separators, footer)
+        # We print the full box top-to-bottom, then will overwrite list rows in place.
+        local current_era_label=""
+        [ -n "$current_era" ] && current_era_label="Current: $(era_display_name "$current_era")"
+
+        local interactive_label="[$(on_off $interactive)]"
+
+        box_top
+        box_center "[ TERMINAL ERAS - TIME MACHINE ]" "$BRIGHT"
+        box_center "\"Choose your decade.\"" "$DIM"
+        if [ -n "$current_era_label" ]; then
+            box_center "$current_era_label" "$CYAN"
+            box_sep
+        else
+            box_sep
+        fi
+
+        # Record where list area starts (current row = after sep)
+        # tput lines gives terminal height; we count printed lines.
+        # After clear: row 0. echo "" → row 1. box_top → row 2.
+        # box_center x3 (or x2) + box_sep...
+        # Instead, we use tput cup to figure out current row by counting:
+        # Header rows:
+        #   row 0: blank (echo "")
+        #   row 1: box_top
+        #   row 2: [ TERMINAL ERAS... ]
+        #   row 3: "Choose your decade."
+        #   row 4: Current: ... (if present) OR box_sep
+        #   row 5: box_sep (if current era shown)
+        if [ -n "$current_era_label" ]; then
+            _BROWSER_LIST_TOP=6
+        else
+            _BROWSER_LIST_TOP=5
+        fi
+
+        # Print VIEWPORT empty lines for the list area (placeholders)
+        local vr=0
+        while [ $vr -lt $VIEWPORT ]; do
+            pad; printf "${DIM}║${NC}%-*s${DIM}║${NC}\n" $(( BOX_W - 2 )) ""
+            vr=$(( vr + 1 ))
+        done
+
+        # Separator + key help + detail
+        box_thin
+        if [ $search_mode -eq 1 ]; then
+            box_kv "Search: ${search_str}_" "" "$CYAN" "$NC"
+        else
+            box_kv "[↑/↓] Navigate  [Enter] Apply  [i] Interactive ${interactive_label}" "" "$DIM" "$BRIGHT"
+        fi
+        box_kv "[m] Matrix  [/] Search  [Esc] Back" "" "$DIM" "$NC"
         box_sep
-        box_center "$STATUS_MSG" "$BRIGHT"
-        STATUS_MSG=""
-    fi
 
-    box_bottom
-    echo ""
-    printf "  ${GREEN}> ${NC}"
-}
+        # Detail rows
+        pad; printf "${DIM}║${NC}%-*s${DIM}║${NC}\n" $(( BOX_W - 2 )) ""
+        pad; printf "${DIM}║${NC}%-*s${DIM}║${NC}\n" $(( BOX_W - 2 )) ""
 
-# ---- ERA CATEGORY SCREENS ----
-screen_era_category() {
-    local category="$1"
-    clear
-    echo ""
-    box_top
+        box_bottom
 
-    case "$category" in
-        wwii)
-            box_center "[ WWII COMPUTING (1940s) ]" "$BRIGHT"
-            box_sep
-            box_empty
-            box_kv "1) Enigma Machine" "Rotor encryption simulator" "$GREEN" "$DIM"
-            box_kv "2) Colossus" "Codebreaking computer" "$GREEN" "$DIM"
-            ;;
-        precrt)
-            box_center "[ PRE-CRT ERA (1950s-1960s) ]" "$BRIGHT"
-            box_sep
-            box_empty
-            box_kv "1) IBM Punch Card" "Keypunch + card reader" "$GREEN" "$DIM"
-            box_kv "2) Teletype ASR-33" "10 chars/sec paper terminal" "$GREEN" "$DIM"
-            box_kv "3) Line Printer" "Greenbar output" "$GREEN" "$DIM"
-            ;;
-        mainframe)
-            box_center "[ MAINFRAMES (1960s-1970s) ]" "$BRIGHT"
-            box_sep
-            box_empty
-            box_kv "1) IBM 3270" "Block-mode terminal" "$GREEN" "$DIM"
-            box_kv "2) IBM System/360" "Mainframe console" "$GREEN" "$DIM"
-            box_kv "3) DEC PDP-8" "Front panel minicomputer" "$GREEN" "$DIM"
-            ;;
-        terminals)
-            box_center "[ EARLY TERMINALS (1970s) ]" "$BRIGHT"
-            box_sep
-            box_empty
-            box_kv "1) DEC VT100" "Green phosphor terminal" "$GREEN" "$DIM"
-            box_kv "2) DEC VT220" "Amber phosphor terminal" "$GREEN" "$DIM"
-            box_kv "3) Altair 8800" "Front panel computer" "$GREEN" "$DIM"
-            ;;
-        home)
-            box_center "[ HOME COMPUTERS (1977-1985) ]" "$BRIGHT"
-            box_sep
-            box_empty
-            box_kv "1) Apple II" "Green phosphor, Applesoft BASIC" "$GREEN" "$DIM"
-            box_kv "2) Commodore PET" "Green CRT, Commodore BASIC" "$GREEN" "$DIM"
-            box_kv "3) TRS-80" "White phosphor, Level II BASIC" "$GREEN" "$DIM"
-            box_kv "4) Commodore 64" "Blue-on-blue, BASIC V2" "$GREEN" "$DIM"
-            box_kv "5) ZX Spectrum" "Keyword entry, Sinclair BASIC" "$GREEN" "$DIM"
-            box_kv "6) BBC Micro" "White-on-black, BBC BASIC" "$GREEN" "$DIM"
-            box_kv "7) Amstrad CPC" "Yellow-on-blue, Locomotive BASIC" "$GREEN" "$DIM"
-            box_kv "8) MSX" "White-on-blue, MSX-BASIC" "$GREEN" "$DIM"
-            box_kv "9) Atari 800" "Atari BASIC" "$GREEN" "$DIM"
-            box_kv "0) Commodore Amiga" "AmigaDOS Workbench" "$GREEN" "$DIM"
-            ;;
-        ibmpc)
-            box_center "[ IBM PC ERA (1981-1995) ]" "$BRIGHT"
-            box_sep
-            box_empty
-            box_kv "1) IBM MDA" "Green phosphor, DOS 3.30" "$GREEN" "$DIM"
-            box_kv "2) IBM CGA" "Color graphics adapter" "$GREEN" "$DIM"
-            box_kv "3) MS-DOS / VGA" "DOS 6.22, VGA display" "$GREEN" "$DIM"
-            ;;
-        professional)
-            box_center "[ PROFESSIONAL UNIX (1985-1998) ]" "$BRIGHT"
-            box_sep
-            box_empty
-            box_kv "1) Sun Solaris" "SunOS 5.6 workstation" "$GREEN" "$DIM"
-            box_kv "2) SGI IRIX" "Silicon Graphics workstation" "$GREEN" "$DIM"
-            box_kv "3) NeXT" "NeXTSTEP grayscale" "$GREEN" "$DIM"
-            ;;
-        bbsnet)
-            box_center "[ BBS & ONLINE (1985-1997) ]" "$BRIGHT"
-            box_sep
-            box_empty
-            box_kv "1) BBS Terminal" "Dial-up with ANSI art & door games" "$GREEN" "$DIM"
-            ;;
-        modern)
-            box_center "[ MODERN (1995-2000) ]" "$BRIGHT"
-            box_sep
-            box_empty
-            box_kv "1) Early Linux" "Slackware, LILO, kernel 2.0" "$GREEN" "$DIM"
-            box_kv "2) Windows 98" "DOS prompt under Windows" "$GREEN" "$DIM"
-            ;;
-    esac
+        # Key help area top is list_top + VIEWPORT + 1 (thin sep)
+        local help_top=$(( _BROWSER_LIST_TOP + VIEWPORT + 1 ))
+        _BROWSER_HELP1_ROW=$help_top
+        _BROWSER_HELP2_ROW=$(( help_top + 1 ))
+        _BROWSER_SEP2_ROW=$(( help_top + 2 ))
+        _BROWSER_DETAIL1_ROW=$(( help_top + 3 ))
+        _BROWSER_DETAIL2_ROW=$(( help_top + 4 ))
 
-    box_empty
-    box_thin
-    box_kv "x) Back to eras" "" "$GREEN" "$NC"
-    box_empty
+        # Now fill in all list rows
+        vr=0
+        while [ $vr -lt $VIEWPORT ]; do
+            _render_list_row $vr
+            vr=$(( vr + 1 ))
+        done
 
-    if [ -n "$STATUS_MSG" ]; then
-        box_sep
-        box_center "$STATUS_MSG" "$BRIGHT"
-        STATUS_MSG=""
-    fi
+        _render_detail
 
-    box_bottom
-    echo ""
-    printf "  ${GREEN}> ${NC}"
-}
+        # Park cursor at bottom
+        tput cup $(( _BROWSER_DETAIL2_ROW + 2 )) 0
+    }
 
-# Map category + number to era ID
-select_era_from_category() {
-    local category="$1" choice="$2"
-    case "${category}_${choice}" in
-        wwii_1)         echo "enigma" ;;
-        wwii_2)         echo "colossus" ;;
-        precrt_1)       echo "punchcard" ;;
-        precrt_2)       echo "teletype" ;;
-        precrt_3)       echo "lineprinter" ;;
-        mainframe_1)    echo "ibm3270" ;;
-        mainframe_2)    echo "system360" ;;
-        mainframe_3)    echo "pdp8" ;;
-        terminals_1)    echo "vt100" ;;
-        terminals_2)    echo "vt220" ;;
-        terminals_3)    echo "altair" ;;
-        home_1)         echo "apple2" ;;
-        home_2)         echo "pet" ;;
-        home_3)         echo "trs80" ;;
-        home_4)         echo "c64" ;;
-        home_5)         echo "spectrum" ;;
-        home_6)         echo "bbc" ;;
-        home_7)         echo "amstrad" ;;
-        home_8)         echo "msx" ;;
-        home_9)         echo "atari800" ;;
-        home_0)         echo "amiga" ;;
-        ibmpc_1)        echo "ibmmda" ;;
-        ibmpc_2)        echo "ibmcga" ;;
-        ibmpc_3)        echo "dos" ;;
-        professional_1) echo "solaris" ;;
-        professional_2) echo "irix" ;;
-        professional_3) echo "next" ;;
-        bbsnet_1)       echo "bbs" ;;
-        modern_1)       echo "linux" ;;
-        modern_2)       echo "win98" ;;
-        *)              echo "" ;;
-    esac
+    # ---- Redraw only changed rows (list + detail) ----
+    _redraw_list() {
+        local vr=0
+        while [ $vr -lt $VIEWPORT ]; do
+            _render_list_row $vr
+            vr=$(( vr + 1 ))
+        done
+        _render_detail
+        tput cup $(( _BROWSER_DETAIL2_ROW + 2 )) 0
+    }
+
+    # ---- Redraw just the help line (for interactive toggle / search mode) ----
+    _redraw_help() {
+        local interactive_label="[$(on_off $interactive)]"
+        local inner=$(( BOX_W - 2 ))
+        tput cup $_BROWSER_HELP1_ROW $_BROWSER_LEFT_COL
+        if [ $search_mode -eq 1 ]; then
+            local search_display="Search: ${search_str}_"
+            printf "${DIM}║${NC}${CYAN}  %-*s${NC}${DIM}║${NC}" $(( inner - 2 )) "$search_display"
+        else
+            local help1="[↑/↓] Navigate  [Enter] Apply  [i] Interactive ${interactive_label}"
+            printf "${DIM}║${NC}${DIM}  %-*s${NC}${DIM}║${NC}" $(( inner - 2 )) "$help1"
+        fi
+    }
+
+    # ---- Initialize ----
+    _BROWSER_LEFT_COL=0
+    _BROWSER_LIST_TOP=5
+    _BROWSER_HELP1_ROW=0
+    _BROWSER_HELP2_ROW=0
+    _BROWSER_SEP2_ROW=0
+    _BROWSER_DETAIL1_ROW=0
+    _BROWSER_DETAIL2_ROW=0
+    _SB_CHAR="│"
+
+    _ensure_visible
+    _draw_browser_full
+
+    # ---- Input loop ----
+    while true; do
+        local key="" key2=""
+        read -rsn1 key
+
+        if [ $search_mode -eq 1 ]; then
+            # In search mode: printable chars add to filter, Esc clears, Backspace removes
+            case "$key" in
+                $'\x1b')
+                    # Could be escape or arrow — peek for bracket
+                    read -rsn2 -t 0.05 key2
+                    if [ -z "$key2" ]; then
+                        # Plain Esc: exit search mode, clear filter
+                        search_mode=0
+                        search_str=""
+                        _rebuild_nav
+                        cursor=0
+                        scroll=0
+                        _ensure_visible
+                        _redraw_help
+                        _redraw_list
+                    else
+                        case "$key2" in
+                            '[A')
+                                [ $cursor -gt 0 ] && cursor=$(( cursor - 1 ))
+                                _ensure_visible
+                                _redraw_list
+                                ;;
+                            '[B')
+                                [ $cursor -lt $(( total_nav - 1 )) ] && cursor=$(( cursor + 1 ))
+                                _ensure_visible
+                                _redraw_list
+                                ;;
+                        esac
+                    fi
+                    ;;
+                $'\x7f'|$'\b')
+                    # Backspace
+                    if [ ${#search_str} -gt 0 ]; then
+                        search_str="${search_str:0:$(( ${#search_str} - 1 ))}"
+                        _rebuild_nav
+                        _ensure_visible
+                        _redraw_help
+                        _redraw_list
+                    fi
+                    ;;
+                $'\r'|$'\n')
+                    # Enter in search: apply selected era
+                    if [ $total_nav -gt 0 ]; then
+                        local sel_entry="${ERA_LIST[${nav_indices[$cursor]}]}"
+                        local sel_id
+                        sel_id=$(_era_field "$sel_entry" 1)
+                        apply_era "$sel_id"
+                        current_era="$sel_id"
+                        search_mode=0
+                        search_str=""
+                        _rebuild_nav
+                        _ensure_visible
+                        _draw_browser_full
+                    fi
+                    ;;
+                *)
+                    # Accept any single printable character (length=1, not a control char)
+                    if [ ${#key} -eq 1 ]; then
+                        # Filter out remaining control chars by ASCII range check via printf hex
+                        local key_hex
+                        key_hex=$(printf '%02x' "'$key" 2>/dev/null) || key_hex="00"
+                        # Accept 0x20 (space) through 0x7e (~)
+                        local key_dec=$(( 16#$key_hex ))
+                        if [ $key_dec -ge 32 ] && [ $key_dec -le 126 ]; then
+                            search_str="${search_str}${key}"
+                            _rebuild_nav
+                            cursor=0
+                            scroll=0
+                            _ensure_visible
+                            _redraw_help
+                            _redraw_list
+                        fi
+                    fi
+                    ;;
+            esac
+            continue
+        fi
+
+        # Normal (non-search) mode
+        case "$key" in
+            $'\x1b')
+                read -rsn2 -t 0.05 key2
+                if [ -z "$key2" ]; then
+                    # Plain Esc — go back to presets
+                    current_screen="presets"
+                    return
+                fi
+                case "$key2" in
+                    '[A'|'OA')
+                        # Up arrow
+                        if [ $cursor -gt 0 ]; then
+                            cursor=$(( cursor - 1 ))
+                            _ensure_visible
+                            _redraw_list
+                        fi
+                        ;;
+                    '[B'|'OB')
+                        # Down arrow
+                        if [ $cursor -lt $(( total_nav - 1 )) ]; then
+                            cursor=$(( cursor + 1 ))
+                            _ensure_visible
+                            _redraw_list
+                        fi
+                        ;;
+                esac
+                ;;
+            k|K)
+                if [ $cursor -gt 0 ]; then
+                    cursor=$(( cursor - 1 ))
+                    _ensure_visible
+                    _redraw_list
+                fi
+                ;;
+            j|J)
+                if [ $cursor -lt $(( total_nav - 1 )) ]; then
+                    cursor=$(( cursor + 1 ))
+                    _ensure_visible
+                    _redraw_list
+                fi
+                ;;
+            $'\r'|$'\n')
+                if [ $total_nav -gt 0 ]; then
+                    local sel_entry="${ERA_LIST[${nav_indices[$cursor]}]}"
+                    local sel_id
+                    sel_id=$(_era_field "$sel_entry" 1)
+                    apply_era "$sel_id"
+                    current_era="$sel_id"
+                    _draw_browser_full
+                fi
+                ;;
+            i|I)
+                local cur_int
+                cur_int=$(read_matrix_conf "MATRIX_ERA_INTERACTIVE" "false")
+                write_matrix_conf "MATRIX_ERA_INTERACTIVE" "$(toggle "$cur_int")"
+                interactive="$(toggle "$cur_int")"
+                _redraw_help
+                ;;
+            m|M)
+                apply_era "matrix"
+                current_era=""
+                _draw_browser_full
+                ;;
+            '/')
+                search_mode=1
+                search_str=""
+                _rebuild_nav
+                _redraw_help
+                ;;
+            x|X|q|Q)
+                current_screen="presets"
+                return
+                ;;
+        esac
+    done
 }
 
 # ---- CUSTOM SETTINGS SCREEN ----
@@ -1546,52 +1965,11 @@ while true; do
         ;;
 
     # ====================
-    # ERAS MAIN SCREEN
+    # ERAS BROWSER SCREEN
     # ====================
     eras)
-        screen_eras
-        read -rsn1 choice
-        case "$choice" in
-            1) current_screen="eras_wwii" ;;
-            2) current_screen="eras_precrt" ;;
-            3) current_screen="eras_mainframe" ;;
-            4) current_screen="eras_terminals" ;;
-            5) current_screen="eras_home" ;;
-            6) current_screen="eras_ibmpc" ;;
-            7) current_screen="eras_professional" ;;
-            8) current_screen="eras_bbsnet" ;;
-            9) current_screen="eras_modern" ;;
-            i|I)
-                cur=$(read_matrix_conf "MATRIX_ERA_INTERACTIVE" "false")
-                write_matrix_conf "MATRIX_ERA_INTERACTIVE" "$(toggle "$cur")"
-                STATUS_MSG="Interactive mode: $(on_off $(toggle "$cur"))"
-                ;;
-            m|M)
-                apply_era "matrix"
-                ;;
-            x|X) current_screen="presets" ;;
-            q|Q|$'\e') break ;;
-        esac
-        ;;
-
-    # ====================
-    # ERA CATEGORY SCREENS
-    # ====================
-    eras_wwii|eras_precrt|eras_mainframe|eras_terminals|eras_home|eras_ibmpc|eras_professional|eras_bbsnet|eras_modern)
-        cat_name="${current_screen#eras_}"
-        screen_era_category "$cat_name"
-        read -rsn1 choice
-        case "$choice" in
-            x|X|$'\e') current_screen="eras" ;;
-            *)
-                selected=$(select_era_from_category "$cat_name" "$choice")
-                if [ -n "$selected" ]; then
-                    apply_era "$selected"
-                else
-                    STATUS_MSG="Invalid selection"
-                fi
-                ;;
-        esac
+        screen_era_browser
+        # screen_era_browser runs its own input loop and sets current_screen="presets" on exit
         ;;
     esac
 done
