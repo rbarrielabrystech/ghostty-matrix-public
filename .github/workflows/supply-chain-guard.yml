@@ -1,0 +1,58 @@
+name: Supply Chain Package Guard
+
+on:
+  pull_request:
+    paths:
+      - '**/requirements*.txt'
+      - '**/pyproject.toml'
+      - '**/poetry.lock'
+      - '**/Pipfile.lock'
+      - '**/uv.lock'
+      - '**/setup.py'
+      - '**/setup.cfg'
+
+jobs:
+  check-blocked-packages:
+    runs-on: ubuntu-latest
+    env:
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for compromised package versions
+        run: |
+          BLOCKED=0
+
+          echo "=== Checking for compromised litellm versions ==="
+
+          CHANGED_FILES=$(git diff --name-only "$BASE_SHA"..HEAD -- \
+            '**requirements*.txt' '**pyproject.toml' '**poetry.lock' \
+            '**Pipfile.lock' '**uv.lock' '**setup.py' '**setup.cfg' 2>/dev/null || true)
+
+          for f in $CHANGED_FILES; do
+            [ -f "$f" ] || continue
+
+            if grep -qiE 'litellm[>=!~]' "$f"; then
+              if grep -qE 'litellm==1\.78\.2' "$f"; then
+                echo "OK: $f has litellm pinned to safe version 1.78.2"
+              else
+                echo "BLOCKED: $f contains litellm dependency NOT pinned to ==1.78.2"
+                echo "  litellm 1.82.7/1.82.8 are compromised (TeamPCP, Mar 2026)"
+                echo "  Pin to litellm==1.78.2 or remove the dependency"
+                grep -n 'litellm' "$f" || true
+                BLOCKED=1
+              fi
+            fi
+          done
+
+          if [ "$BLOCKED" -eq 1 ]; then
+            echo ""
+            echo "================================================================"
+            echo "SUPPLY CHAIN GUARD: PR blocked due to compromised package risk"
+            echo "================================================================"
+            exit 1
+          fi
+
+          echo "All dependency files clean."
